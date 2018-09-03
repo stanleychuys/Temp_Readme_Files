@@ -112,124 +112,111 @@ https://github.com/NTC-CCBG/meta-openbmc-nuvoton-addon/tree/master/recipes-phosp
 
 2. Prepare a Supermicro MBD-X9SCL-F-0 motherboard and a LPC cable.
 
-    - The UEFI firmware version in Supermicro MBD-X9SCL-F-0 for verification is 2.15.1234.
+  * The UEFI firmware version in Supermicro MBD-X9SCL-F-0 for verification is 2.15.1234.
 
-3. Connect pins of the **JTPM** header on Supermicro MBD-X9SCL-F-0 to the **J10** header on Poleg EVB with the LPC cable:
+3. Connect pins of the **JTPM** header on **Supermicro MBD-X9SCL-F-0** to the **J10** header on **Poleg EVB** with the LPC cable:
+  * Connect **pin 1-3, 5, 7-8, 10-12, 15-17** of JTPM with corresponding pins of J10, **one on one**.
+  
+4. Steps to copy UEFI SOL related drivers to a USB drive.  
 
-| JTPM of SMC MB | J10 of Poleg EVB |
-|:-------------------:|:-------------------:|
-| Pin 1-3 | Pin 1-3 |
-| Pin 5 | Pin 5 |
-| Pin 7-8 | Pin 7-8 |
-| Pin 10-12 | Pin 10-12 |
-| Pin 15-17 | Pin 15-17 |
+  * Format the USB drive in FAT or FAT32.  
+  * Download PolegSerialDxe.efi and TerminalDxe.efi from  https://github.com/Nuvoton-Israel/openbmc-uefi-util/tree/npcm7xx_v2.1/sol_binary and copy them to the USB drive.
 
-4.) Steps to copy UEFI SOL related drivers to a USB drive.  
+5. Power up the Poleg EVB and steps to prepare a working terminal for Poleg:
 
-    4-1) Format the USB drive in FAT or FAT32.  
-    4-2) Download PolegSerialDxe.efi and TerminalDxe.efi from  
-         https://github.com/Nuvoton-Israel/openbmc-uefi-util/tree/npcm7xx_v2.1/sol_binary  
-		 and copy them to the USB drive.
+  * Download and install the USB-to-UART driver from: http://www.ftdichip.com/Drivers/VCP.htm according to the host OS in your workstation.  
+  * Connect a micro usb cable from your workstation to J2 header of Poleg EVB.  
+  * Wait for the FTDI driver to be installed automatically. The COM port number is assigned automatically.  
+  * Open a terminal (e.g., Tera Term version 4.87) and set the correct COM port number assigned by the FTDI driver (in previous step).  
+  * The COM port should be configured as follows: **115200, 8 bit, 1 stop-bit, no parity, no flow control**.  
+  * Press and release the **PWR-ON-RST (SW3)** button to issue a Power-On-reset.  It's expected to see messages output by Poleg on the terminal. Use the following login name/password to login into Poleg.
+    + Login name: **root**  
+    + Login password: **0penBmc**  
 
-5) Power up the Poleg EVB and steps to prepare a working terminal for Poleg:
+6. Steps to configure Supermicro MBD-X9SCL-F-0 UEFI setting for SOL:
 
-    5-1) Download and install the USB-to-UART driver from: http://www.ftdichip.com/Drivers/VCP.htm  
-         according to the host OS in your workstation.  
-    5-2) Connect a micro usb cable from your workstation to J2 header of Poleg EVB.  
-    5-3) Wait for the FTDI driver to be installed automatically.  
-         The COM port number is assigned automatically.  
-    5-4) Open a terminal (e.g., Tera Term version 4.87) and set the correct COM port number  
-         assigned by the FTDI driver (in Step 5-3).  
-    5-5) The COM port should be configured as follows: 115200, 8 bit, 1 stop-bit,  
-         no parity no flow control.  
-    5-6) Press and release the PWR-ON-RST (SW3) button to issue a Power-On-reset.  
-         It's expected to see messages output by Poleg on the terminal.  
-         Use the following login name/password to login into Poleg.
-         Login name: root  
-         Login password: 0penBmc  
+  * Do not plug any bootable device into Supermicro MBD-X9SCL-F-0.  
+  * Power up Supermicro MBD-X9SCL-F-0 and boot into UEFI setting.  
+  * Navigate to **Super IO Concifugration** in **Advanced** menu option and enter into **Super IO Concifugration**".  
+  * Configure serial port 1 to **IO=3E8h; IRQ=5**, and then disable it.  
+  * Go back to the main UEFI setting.  
+  * Navigate to **Boot** menu option and select **UEFI: Built-in EFI Shell** as Boot Option #1.  
+    + Make sure that the rest boot options are set to **Disabled**.  
+  * Navigate to **Exit** menu option and select **Save changes and Reset**.  
+  * Press **Yes** in the prompt window and it will reboot then.  
+  * Wait for Supermicro MBD-X9SCL-F-0 to boot into UEFI shell.  
+  * Plug the USB drive prepared in 4) into Supermicro MBD-X9SCL-F-0's usb slot.  
+  * Input the following command at UEFI shell prompt, press enter key and it will route to UEFI shell again.  
+  * Check the device mapping table of the USB drive in UEFI shell. It is **fs0:** here for example.  
+  * Input the following command at UEFI shell prompt, press enter key and the prompt will show **fs0:\>** from now.  
+  * Input the following command at UEFI shell prompt and press the enter key.  
+    ```
+    fs0:>load PolegSerialDxe.efi  
+	```
+  * Input the following command at UEFI shell prompt and press the enter key.  
+    ```
+	fs0:>load TerminalDxe.efi  
+	```
+  * Unplug the usb drive.  
+  * Input the following command at UEFI shell prompt and it will route to the UEFI setting. 
 
-6) Steps to configure Supermicro MBD-X9SCL-F-0 UEFI setting for SOL:
+7. Prepare a PC or use a virtual pc software to install Ubuntu 14.04, 64 bit on your workstation.  
+  * Boot Ubuntu and log in as a normal user.
 
-    6-1) Do not plug any bootable device into Supermicro MBD-X9SCL-F-0.  
-    6-2) Power up Supermicro MBD-X9SCL-F-0 and boot into UEFI setting.  
-    6-3) Navigate to "Super IO Concifugration" in "Advanced" menu option and   
-		enter into "Super IO Concifugration".  
-    6-4) Configure serial port 1 to "IO=3E8h; IRQ=5;" and then disable it.  
-    6-5) Go back to the main UEFI setting.  
-    6-6) Navigate to "Boot" menu option and select "UEFI: Built-in EFI Shell" as Boot Option #1.  
-&ensp;&ensp;&ensp;&ensp;6-6-1) Make sure that the rest boot options are set to "Disabled".  
-    6-7) Navigate to "Exit" menu option and select "Save changes and Reset".  
-    6-8) Press "Yes" in the prompt window and it will reboot then.  
-    6-9) Wait for Supermicro MBD-X9SCL-F-0 to boot into UEFI shell.  
-    6-10) Plug the USB drive prepared in 4) into Supermicro MBD-X9SCL-F-0's usb slot.  
-    6-11) Input the following command at UEFI shell prompt, press enter key and  
-		it will route to UEFI shell again.  
-&ensp;&ensp;&ensp;exit  
-    6-12) Check the device mapping table of the USB drive in UEFI shell. It is "fs0:"  
-		here for example.  
-    6-13) Input the following command at UEFI shell prompt, press enter key and the prompt will  
-		show "fs0:\>" from now.  
-&ensp;&ensp;&ensp;fs0:  
-    6-14) Input the following command at UEFI shell prompt and press the enter key.  
-&ensp;&ensp;&ensp;load PolegSerialDxe.efi  
-    6-15) Input the following command at UEFI shell prompt and press the enter key.  
-&ensp;&ensp;&ensp;load TerminalDxe.efi  
-    6-16) Unplug the usb drive.  
-    6-17) Input the following command at UEFI shell prompt and it will route to the UEFI setting.  
-&ensp;&ensp;&ensp;exit
+8. Open a terminal in Ubuntu 14.04. Steps to install and execute software for SOL:
 
-7) Prepare a PC or use a virtual pc software to install Ubuntu 14.04, 64 bit on your workstation.  
-    7-1) Boot Ubuntu and log in as a normal user.
+  * Install git:  
+    + Input the following command in the opened terminal and press enter key:  
+      ```
+      sudo apt-get install git  
+	  ```
+  * Install Nodejs. 
+    + Input the following command in the opened terminal and press enter key:  
+      ```
+	  curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -  
+	  ```
+    + Input the following command in the opened terminal and press enter key:  
+      ```
+	  sudo apt-get install -y nodejs  
+	  ```
+    + install build tools. Input the following command in the opened terminal and press enter key:  
+      ```
+	  sudo apt-get install -y build-essential  
+	  ```
+  * Install phosphor-webui:  
+    + Download phosphor-webui. Input the following command in the opened terminal and press enter key:  
+      ```
+	  git clone https://github.com/openbmc/phosphor-webui.git  
+	  ```
+    + Navigate your working path to the phosphor-webui folder in the opened terminal. Then input the following command in the opened terminal and press enter key:  
+      ```
+	  npm install  
+	  ```
+    + Run phosphor-webui. Input the following command in the opened terminal and press enter key:  
+      ```
+	  npm run-script server  
+	  ```
 
-8) Open a terminal in Ubuntu 14.04. Steps to install and execute software for SOL:
+9. Configure the ethernet communication between Ubuntu 14.04 and Poleg EVB:
 
-    8-1) Install git:  
-		Input the following command in the opened terminal and press enter key:  
-&ensp;&ensp;&ensp;sudo apt-get install git  
-    8-2) Install Nodejs:  
-&ensp;&ensp;&ensp;&ensp;8-2-1) Input the following command in the opened terminal and press enter key:  
-&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -  
-&ensp;&ensp;&ensp;&ensp;8-2-2) Input the following command in the opened terminal and press enter key:  
-&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;sudo apt-get install -y nodejs  
-&ensp;&ensp;&ensp;&ensp;8-2-3) install build tools:  
-&ensp;&ensp;&ensp;&ensp;Input the following command in the opened terminal and press enter key:  
-&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;sudo apt-get install -y build-essential  
-    8-2) Install phosphor-webui:  
-&ensp;&ensp;&ensp;&ensp;8-2-1) Download phosphor-webui.  
-&ensp;&ensp;&ensp;&ensp;Input the following command in the opened terminal and press enter key:  
-&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;git clone https://github.com/openbmc/phosphor-webui.git  
-&ensp;&ensp;&ensp;&ensp;8-2-2) Navigate your working path to the phosphor-webui folder in the opened terminal.  
-&ensp;&ensp;&ensp;&ensp;Then input the following command in the opened terminal and press enter key:  
-&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;npm install  
-&ensp;&ensp;&ensp;&ensp;8-2-3) Run phosphor-webui.  
-&ensp;&ensp;&ensp;&ensp;Input the following command in the opened terminal and press enter key:  
-&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;npm run-script server  
+  * Connect an ethernet cable between the PC running Ubuntu 14.04 and J7 header of Poleg EVB.  
+  * Configure Ubuntu 14.04 ip address to 192.168.0.1 and the netmask to 255.255.255.0 as an example here.  
+  * Configure Poleg EVB ip address to 192.168.0.2 and the netmask to 255.255.255.0. For example, input the following command in the terminal connected to Poleg EVB on your workstation and press enter key:  
+    ```
+	ifconfig eth0 192.168.0.2 netmask 255.255.255.0
+	```
 
-9) Steps to configure the ethernet communication between Ubuntu 14.04 and Poleg EVB:
+10. Run SOL:
 
-    9-1) Connect an ethernet cable between the PC running Ubuntu 14.04 and J7 header of Poleg EVB.  
-    9-2) Configure Ubuntu 14.04 ip address to 192.168.0.1 and the netmask to 255.255.255.0  
-         as an example here.  
-    9-3) Configure Poleg EVB ip address to 192.168.0.2 and the netmask to 255.255.255.0.  
-         For example, input the following command in the terminal connected to Poleg EVB  
-         on your workstation and press enter key:  
-&ensp;&ensp;&ensp;&ensp;ifconfig eth0 192.168.0.2 netmask 255.255.255.0
-         
-
-10) Steps to run SOL:
-
-    10-1) Launch a browser in Ubuntu 14.04, open a tab window and navigate to https://192.168.0.2.  
-    10-2) By pass the secure warning. You will see a JSON response with Login required message.  
-    10-3) In the same tab window, navigate to http://localhost:8080. Enter the BMC IP  
-          (which is 192.168.0.2 as an example here, Username and Password (defaults: root/0penBmc)).  
-    10-4) You will see the OpenBMC management screen.  
-    10-5) Click "Server control" at the left side of the OpenBMC management screen.  
-    10-6) A "Serial over LAN console" menu item prompts then and click it.  
-    10-7) A specific area will display the UEFI setting of Supermicro MBD-X9SCL-F-0.  
-    10-8) (Optional) If the area doesn't display the UEFI setting clearly, use the mouse pointer  
-		  to click in the area and press the "Esc" key.  
-&ensp;&ensp;&ensp;&ensp;10-8-1) It shows a prompt window named "Exit Without Saving", choose "No" and press enter key  
-&ensp;&ensp;&ensp;&ensp;to refresh the area for showing UEFI setting entirely.
+  * Launch a browser in Ubuntu 14.04, open a tab window and navigate to https://192.168.0.2.  
+  * By pass the secure warning. You will see a JSON response with Login required message.  
+  * In the same tab window, navigate to http://localhost:8080. Enter the BMC IP (which is 192.168.0.2 as an example here, Username and Password (defaults: root/0penBmc)).  
+  * You will see the OpenBMC management screen.  
+  * Click **Server control** at the left side of the OpenBMC management screen.  
+  * A **Serial over LAN console** menu item prompts then and click it.  
+  * A specific area will display the UEFI setting of Supermicro MBD-X9SCL-F-0.  
+  * (Optional) If the area doesn't display the UEFI setting clearly, use the mouse pointer to click in the area and press the **Esc** key.  
+    + It shows a prompt window named **Exit Without Saving**, choose **No** and press enter key to refresh the area for showing UEFI setting entirely.
 
 ** Maintainer **
 
@@ -262,9 +249,166 @@ https://github.com/NTC-CCBG/meta-openbmc-nuvoton-addon/tree/master/recipes-phosp
 
 # IPMI Comamnds Verified
 
-| Command | KCS | Net | IPMB |
-|:------------:|:----:|:-----:|:------:|
-| SendMessage | V | - | - |
+| Command | KCS | RMCP+ | IPMB |
+| :--- | :---: | :---: | :---: |
+| **IPM Device Global Commands** |  |  |  |
+| Device ID | V | V | V |
+| Cold Reset |  |  |  |
+| Warm Reset |  |  |  |
+| Get Self Test Results |  |  |  |
+| Manufacturing Test On |  |  |  |
+| Set ACPI Power State |  |  |  |
+| Get ACPI Power State |  |  |  |
+| Get Device GUID |  |  |  |
+| Get NetFn Support |  |  |  |
+| Get Command Support |  |  |  |
+| Get Command Sub-function Support |  |  |  |
+| Get Configurable Commands |  |  |  |
+| Get Configurable Command Sub-functions |  |  |  |
+| Set Command Enables |  |  |  |
+| Get Command Enables |  |  |  |
+| Set Command Sub-function Enables |  |  |  |
+| Get Command Sub-function Enables |  |  |  |
+| Get OEM NetFn IANA Support |  |  |  |
+| **BMC Watchdog Timer Commands** |  |  |  |
+| Reset Watchdog Timer |  |  |  |
+| Set Watchdog Timer |  |  |  |
+| Get Watchdog Timer |  |  |  |
+| **BMC Device and Messaging Commands** |  |  |  |
+| Set BMC Global Enables |  |  |  |
+| Get BMC Global Enables |  |  |  |
+| Clear Message Flags |  |  |  |
+| Get Message Flags |  |  |  |
+| Enable Message Channel Receive |  |  |  |
+| Get Message |  |  |  |
+| Send Message | V |  |  |
+| Read Event Message Buffer |  |  |  |
+| Get System GUID |  |  |  |
+| Set System Info Parameters |  |  |  |
+| Get System Info Parameters |  |  |  |
+| Get Channel Authentication Capabilities |  | V |  |
+| Get Session Challenge |  |  |  |
+| Activate Session |  |  |  |
+| Set Session Privilege Level |  |  |  |
+| Close Session |  |  |  |
+| Get Session Info |  |  |  |
+| Get AuthCode |  |  |  |
+| Set Channel Access |  |  |  |
+| Get Channel Access |  |  |  |
+| Get Channel Info Command |  |  |  |
+| User Access Command |  |  |  |
+| Get User Access Command |  |  |  |
+| Set User Name |  |  |  |
+| Get User Name Command |  |  |  |
+| Set User Password Command |  |  |  |
+| Activate Payload |  | V |  |
+| Deactivate Payload |  |  |  |
+| Get Payload Activation Status |  |  |  |
+| Get Payload Instance Info |  |  |  |
+| Set User Payload Access |  |  |  |
+| Get User Payload Access |  |  |  |
+| Get Channel Payload Support |  |  |  |
+| Get Channel Payload Version |  |  |  |
+| Get Channel OEM Payload Info |  |  |  |
+| Master Write-Read |  |  |  |
+| Get Channel Cipher Suites |  |  |  |
+| Suspend/Resume Payload Encryption |  |  |  |
+| Set Channel Security Keys |  |  |  |
+| Get System Interface Capabilities |  |  |  |
+| Firmware Firewall Configuration |  |  |  |
+| **Chassis Device Commands** |  |  |  |
+| Get Chassis Capabilities |  |  |  |
+| Get Chassis Status |  |  |  |
+| Chassis Control |  |  |  |
+| Chassis Reset |  |  |  |
+| Chassis Identify |  | V |  |
+| Set Front Panel Button Enables |  |  |  |
+| Set Chassis Capabilities |  |  |  |
+| Set Power Restore Policy |  |  |  |
+| Set Power Cycle Interval |  |  |  |
+| Get System Restart Cause |  |  |  |
+| Set System Boot Options |  |  |  |
+| Get System Boot Options |  |  |  |
+| Get POH Counter |  |  |  |
+| **Event Commands** |  |  |  |
+| Set Event Receiver |  |  |  |
+| Get Event Receiver |  |  |  |
+| Platform Event |  |  |  |
+| **PEF and Alerting Commands** |  |  |  |
+| Get PEF Capabilities |  |  |  |
+| Arm PEF Postpone Timer |  |  |  |
+| Set PEF Configuration Parameters |  |  |  |
+| Get PEF Configuration Parameters |  |  |  |
+| Set Last Processed Event ID |  |  |  |
+| Get Last Processed Event ID |  |  |  |
+| Alert Immediate |  |  |  |
+| PET Acknowledge |  |  |  |
+| **Sensor Device Commands** |  |  |  |
+| Get Device SDR Info |  |  |  |
+| Get Device SDR |  |  |  |
+| Reserve Device SDR Repository |  |  |  |
+| Get Sensor Reading Factors |  |  |  |
+| Set Sensor Hysteresis |  |  |  |
+| Get Sensor Hysteresis |  |  |  |
+| Set Sensor Threshold |  |  |  |
+| Get Sensor Threshold |  |  |  |
+| Set Sensor Event Enable |  |  |  |
+| Get Sensor Event Enable |  |  |  |
+| Re-arm Sensor Events |  |  |  |
+| Get Sensor Event Status |  |  |  |
+| Get Sensor Reading |  |  |  |
+| Set Sensor Type |  |  |  |
+| Get Sensor Type |  |  |  |
+| Set Sensor Reading And Event Status |  |  |  |
+| **FRU Device Commands** |  |  |  |
+| Get FRU Inventory Area Info |  |  |  |
+| Read FRU Data |  |  |  |
+| Write FRU Data |  |  |  |
+| **SDR Device Commands** |  |  |  |
+| Get SDR Repository Info |  |  |  |
+| Get SDR Repository Allocation Info |  |  |  |
+| Reserve SDR Repository |  |  |  |
+| Get SDR |  |  |  |
+| Add SDR |  |  |  |
+| Partial Add SDR |  |  |  |
+| Delete SDR |  |  |  |
+| Clear SDR Repository |  |  |  |
+| Get SDR Repository Time |  |  |  |
+| Set SDR Repository Time |  |  |  |
+| Enter SDR Repository Update Mode |  |  |  |
+| Exit SDR Repository Update Mode |  |  |  |
+| Run Initialization Agent |  |  |  |
+| **SEL Device Commands** |  |  |  |
+| Get SEL Info |  |  |  |
+| Get SEL Allocation Info |  |  |  |
+| Reserve SEL |  |  |  |
+| Get SEL Entry |  |  |  |
+| Add SEL Entry |  |  |  |
+| Partial Add SEL Entry |  |  |  |
+| Delete SEL Entry |  |  |  |
+| Clear SEL |  |  |  |
+| Get SEL Time |  |  |  |
+| Set SEL Time |  |  |  |
+| Get Auxiliary Log Status |  |  |  |
+| Set Auxiliary Log Status |  |  |  |
+| Get SEL Time UTC Offset |  |  |  |
+| Set SEL Time UTC Offset |  |  |  |
+| **LAN Device Commands** |  |  |  |
+| Set LAN Configuration Parameters |  |  |  |
+| Get LAN Configuration Parameters |  |  |  |
+| Suspend BMC ARPs |  |  |  |
+| Get IP/UDP/RMCP Statistics |  |  |  |
+| **Serial/Modem Device Commands** |  |  |  |
+| Set Serial/Modem Mux |  |  |  |
+| Set Serial Routing Mux |  |  |  |
+| SOL Activating |  | V |  |
+| Set SOL Configuration Parameters |  |  |  |
+| Get SOL Configuration Parameters |  |  |  |
+| **Command Forwarding Commands** |  |  |  |
+| Forwarded Command |  |  |  |
+| Set Forwarded Commands |  |  |  |
+| Get Forwarded Commands |  |  |  |
+| Enable Forwarded Commands |  |  | . |
 
 # Modifications
 
@@ -272,4 +416,3 @@ https://github.com/NTC-CCBG/meta-openbmc-nuvoton-addon/tree/master/recipes-phosp
 * 2018.08.02 First release SOL
 * 2018.08.07 Modify Readme.md for adding description about SOL How to use
 * 2018.08.13 Update vcd and ece patch, rename remote-kvm to obmc-ikvm
-
