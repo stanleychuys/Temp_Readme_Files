@@ -90,18 +90,16 @@ In order to support some hardware features of Nuvoton's NPCM750, please use our 
 1. launch obmc-ikvm
     ```
     ./obmc-ikvm &
-    
-    * Please skip this step if obmc-ikvm daemon is managed by systemd
     ```
+    > _Please skip this step if obmc-ikvm daemon is managed by systemd_
 
 2. open VNC viewer
 
     ```
     IP xxx.xxx.xxx.xxx
     port 5900
-    
-    * Please choose hextile as preferred encoding.
     ```
+    > _Please choose hextile as preferred encoding._
 
 **Maintainer**
 
@@ -128,7 +126,7 @@ It's verified with Nuvoton's NPCM750 solution and Supermicro MBD-X9SCL-F-0.
 1. Prepare a Poleg EVB with up-to-date boot block, Uboot and OpenBMC versions with this SOL patch applied.  Check with Nuvoton support for the most recent versions.
 
 2. Prepare a Supermicro MBD-X9SCL-F-0 motherboard and a LPC cable.
-    * The UEFI firmware version in Supermicro MBD-X9SCL-F-0 for verification is 2.15.1234.
+    > _The UEFI firmware version in Supermicro MBD-X9SCL-F-0 for verification is 2.15.1234._
 
 3. Connect pins of the **JTPM** header on **Supermicro MBD-X9SCL-F-0** to the **J10** header on **Poleg EVB** with the LPC cable:
     * Connect **pin 1-3, 5, 7-8, 10-12, 15-17** of JTPM with corresponding pins of J10, **one on one**.
@@ -153,15 +151,15 @@ It's verified with Nuvoton's NPCM750 solution and Supermicro MBD-X9SCL-F-0.
 
     * Do not plug any bootable device into Supermicro MBD-X9SCL-F-0.  
     * Power up Supermicro MBD-X9SCL-F-0 and boot into UEFI setting.  
-    * Navigate to **Super IO Concifugration** in **Advanced** menu option and enter into **Super IO Concifugration**".  
+    * Navigate to `Super IO Concifugration` in `Advanced` menu option and enter into `Super IO Concifugration`.  
     * Configure serial port 1 to **IO=3E8h; IRQ=5**, and then disable it.  
     * Go back to the main UEFI setting.  
-    * Navigate to **Boot** menu option and select **UEFI: Built-in EFI Shell** as Boot Option #1.  
+    * Navigate to `Boot` menu option and select `UEFI: Built-in EFI Shell` as Boot Option #1.  
       + Make sure that the rest boot options are set to **Disabled**.  
-    * Navigate to **Exit** menu option and select **Save changes and Reset**.  
-    * Press **Yes** in the prompt window and it will reboot then.  
+    * Navigate to `Exit` menu option and select `Save changes and Reset`.  
+    * Press `Yes` in the prompt window and it will reboot then.  
     * Wait for Supermicro MBD-X9SCL-F-0 to boot into UEFI shell.  
-    * Plug the USB drive prepared in 4) into Supermicro MBD-X9SCL-F-0's usb slot.  
+    * Plug the USB drive prepared in step-4 into Supermicro MBD-X9SCL-F-0's usb slot.  
     * Input the following command at UEFI shell prompt, press enter key and it will route to UEFI shell again.  
     * Check the device mapping table of the USB drive in UEFI shell. It is **fs0:** here for example.  
     * Input the following command at UEFI shell prompt, press enter key and the prompt will show **fs0:\>** from now.  
@@ -177,7 +175,7 @@ It's verified with Nuvoton's NPCM750 solution and Supermicro MBD-X9SCL-F-0.
     * Input the following command at UEFI shell prompt and it will route to the UEFI setting. 
 
 7. Prepare a PC or use a virtual pc software to install Ubuntu 14.04, 64 bit on your workstation.  
-    * Boot Ubuntu and log in as a normal user.
+    > _Boot Ubuntu and log in as a normal user._
 
 8. Open a terminal in Ubuntu 14.04. Steps to install and execute software for SOL:
 
@@ -226,13 +224,13 @@ It's verified with Nuvoton's NPCM750 solution and Supermicro MBD-X9SCL-F-0.
 
     * Launch a browser in Ubuntu 14.04, open a tab window and navigate to https://192.168.0.2.  
     * By pass the secure warning. You will see a JSON response with Login required message.  
-    * In the same tab window, navigate to http://localhost:8080. Enter the BMC IP (which is 192.168.0.2 as an example here, Username and Password (defaults: root/0penBmc)).  
+    * In the same tab window, navigate to http://localhost:8080. Enter the BMC IP (which is 192.168.0.2 as an example here, Username and Password (defaults: **root/0penBmc**).  
     * You will see the OpenBMC management screen.  
-    * Click **Server control** at the left side of the OpenBMC management screen.  
-    * A **Serial over LAN console** menu item prompts then and click it.  
+    * Click `Server control` at the left side of the OpenBMC management screen.  
+    * A `Serial over LAN console` menu item prompts then and click it.  
     * A specific area will display the UEFI setting of Supermicro MBD-X9SCL-F-0.  
     * (Optional) If the area doesn't display the UEFI setting clearly, use the mouse pointer to click in the area and press the **Esc** key.  
-      + It shows a prompt window named **Exit Without Saving**, choose **No** and press enter key to refresh the area for showing UEFI setting entirely.
+      + It shows a prompt window named `Exit Without Saving`, choose `No` and press enter key to refresh the area for showing UEFI setting entirely.
 
 **Maintainer**
 
