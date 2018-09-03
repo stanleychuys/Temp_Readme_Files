@@ -49,7 +49,24 @@ BBLAYERS ?= " \
 
 # Table of Contents
 
-[TOC]
+- [Dependencies](#dependencies)
+- [Contacts for Patches](#contacts-for-patches)
+- [How to apply this layer](#how-to-apply-this-layer)
+- [Enabled Features](#enabled-features)
+  * [WebUI](#webui)
+    + [OBMC iKVM](#obmc-ikvm)
+    + [SOL](#sol)
+    + [VM](#vm)
+    + [Event Log Dump](#event-log-dump)
+  * [System](#system)
+    + [User Management](#user-management)
+    + [Time](#time)
+    + [Sensor](#sensor)
+  * [IPMI / DCMI](#ipmi---dcmi)
+    + [SOL](#sol-1)
+    + [Message Bridging](#message-bridging)
+- [IPMI Comamnds Verified](#ipmi-comamnds-verified)
+- [Modifications](#modifications)
 
 # Enabled Features
 
@@ -64,11 +81,11 @@ In order to support some hardware features of Nuvoton's NPCM750, please use our 
 2. Add Encoding Compression Engine(ECE), 16-bit hextile compression hardware encoding.
 3. Add USB HID, support Keyboard and Mouse.
 
-** Source URL **
+**Source URL**
 
-https://github.com/Nuvoton-Israel/obmc-ikvm
+* [https://github.com/Nuvoton-Israel/obmc-ikvm](https://github.com/Nuvoton-Israel/obmc-ikvm)
 
-** How to use **
+**How to use**
 
 1. launch obmc-ikvm
     ```
@@ -86,7 +103,7 @@ https://github.com/Nuvoton-Israel/obmc-ikvm
     * Please choose hextile as preferred encoding.
     ```
 
-** Maintainer **
+**Maintainer**
 
 * Joseph Liu
 
@@ -100,125 +117,124 @@ The patch provides the [obmc-console](https://github.com/openbmc/obmc-console) c
 
 It's verified with Nuvoton's NPCM750 solution and Supermicro MBD-X9SCL-F-0.
 
-** Source URL **
+**Source URL**
 
-https://github.com/NTC-CCBG/meta-openbmc-nuvoton-addon/tree/master/recipes-phosphor/console
+* [https://github.com/NTC-CCBG/meta-openbmc-nuvoton-addon/tree/master/recipes-phosphor/console](https://github.com/NTC-CCBG/meta-openbmc-nuvoton-addon/tree/master/recipes-phosphor/console)
 
-https://github.com/NTC-CCBG/meta-openbmc-nuvoton-addon/tree/master/recipes-phosphor/interfaces
+* [https://github.com/NTC-CCBG/meta-openbmc-nuvoton-addon/tree/master/recipes-phosphor/interfaces](https://github.com/NTC-CCBG/meta-openbmc-nuvoton-addon/tree/master/recipes-phosphor/interfaces)
 
-** How to use **
+**How to use**
 
 1. Prepare a Poleg EVB with up-to-date boot block, Uboot and OpenBMC versions with this SOL patch applied.  Check with Nuvoton support for the most recent versions.
 
 2. Prepare a Supermicro MBD-X9SCL-F-0 motherboard and a LPC cable.
-
-  * The UEFI firmware version in Supermicro MBD-X9SCL-F-0 for verification is 2.15.1234.
+    * The UEFI firmware version in Supermicro MBD-X9SCL-F-0 for verification is 2.15.1234.
 
 3. Connect pins of the **JTPM** header on **Supermicro MBD-X9SCL-F-0** to the **J10** header on **Poleg EVB** with the LPC cable:
-  * Connect **pin 1-3, 5, 7-8, 10-12, 15-17** of JTPM with corresponding pins of J10, **one on one**.
+    * Connect **pin 1-3, 5, 7-8, 10-12, 15-17** of JTPM with corresponding pins of J10, **one on one**.
   
 4. Steps to copy UEFI SOL related drivers to a USB drive.  
 
-  * Format the USB drive in FAT or FAT32.  
-  * Download PolegSerialDxe.efi and TerminalDxe.efi from  https://github.com/Nuvoton-Israel/openbmc-uefi-util/tree/npcm7xx_v2.1/sol_binary and copy them to the USB drive.
+    * Format the USB drive in FAT or FAT32.  
+    * Download PolegSerialDxe.efi and TerminalDxe.efi from  https://github.com/Nuvoton-Israel/openbmc-uefi-util/tree/npcm7xx_v2.1/sol_binary and copy them to the USB drive.
 
 5. Power up the Poleg EVB and steps to prepare a working terminal for Poleg:
 
-  * Download and install the USB-to-UART driver from: http://www.ftdichip.com/Drivers/VCP.htm according to the host OS in your workstation.  
-  * Connect a micro usb cable from your workstation to J2 header of Poleg EVB.  
-  * Wait for the FTDI driver to be installed automatically. The COM port number is assigned automatically.  
-  * Open a terminal (e.g., Tera Term version 4.87) and set the correct COM port number assigned by the FTDI driver (in previous step).  
-  * The COM port should be configured as follows: **115200, 8 bit, 1 stop-bit, no parity, no flow control**.  
-  * Press and release the **PWR-ON-RST (SW3)** button to issue a Power-On-reset.  It's expected to see messages output by Poleg on the terminal. Use the following login name/password to login into Poleg.
-    + Login name: **root**  
-    + Login password: **0penBmc**  
+    * Download and install the USB-to-UART driver from: http://www.ftdichip.com/Drivers/VCP.htm according to the host OS in your workstation.  
+    * Connect a micro usb cable from your workstation to J2 header of Poleg EVB.  
+    * Wait for the FTDI driver to be installed automatically. The COM port number is assigned automatically.  
+    * Open a terminal (e.g., Tera Term version 4.87) and set the correct COM port number assigned by the FTDI driver (in previous step).  
+    * The COM port should be configured as follows: **115200, 8 bit, 1 stop-bit, no parity, no flow control**.  
+    * Press and release the **PWR-ON-RST (SW3)** button to issue a Power-On-reset.  It's expected to see messages output by Poleg on the terminal. Use the following login name/password to login into Poleg.
+        * Login name: **root**  
+        * Login password: **0penBmc**  
 
 6. Steps to configure Supermicro MBD-X9SCL-F-0 UEFI setting for SOL:
 
-  * Do not plug any bootable device into Supermicro MBD-X9SCL-F-0.  
-  * Power up Supermicro MBD-X9SCL-F-0 and boot into UEFI setting.  
-  * Navigate to **Super IO Concifugration** in **Advanced** menu option and enter into **Super IO Concifugration**".  
-  * Configure serial port 1 to **IO=3E8h; IRQ=5**, and then disable it.  
-  * Go back to the main UEFI setting.  
-  * Navigate to **Boot** menu option and select **UEFI: Built-in EFI Shell** as Boot Option #1.  
-    + Make sure that the rest boot options are set to **Disabled**.  
-  * Navigate to **Exit** menu option and select **Save changes and Reset**.  
-  * Press **Yes** in the prompt window and it will reboot then.  
-  * Wait for Supermicro MBD-X9SCL-F-0 to boot into UEFI shell.  
-  * Plug the USB drive prepared in 4) into Supermicro MBD-X9SCL-F-0's usb slot.  
-  * Input the following command at UEFI shell prompt, press enter key and it will route to UEFI shell again.  
-  * Check the device mapping table of the USB drive in UEFI shell. It is **fs0:** here for example.  
-  * Input the following command at UEFI shell prompt, press enter key and the prompt will show **fs0:\>** from now.  
-  * Input the following command at UEFI shell prompt and press the enter key.  
-    ```
-    fs0:>load PolegSerialDxe.efi  
-	```
-  * Input the following command at UEFI shell prompt and press the enter key.  
-    ```
-	fs0:>load TerminalDxe.efi  
-	```
-  * Unplug the usb drive.  
-  * Input the following command at UEFI shell prompt and it will route to the UEFI setting. 
+    * Do not plug any bootable device into Supermicro MBD-X9SCL-F-0.  
+    * Power up Supermicro MBD-X9SCL-F-0 and boot into UEFI setting.  
+    * Navigate to **Super IO Concifugration** in **Advanced** menu option and enter into **Super IO Concifugration**".  
+    * Configure serial port 1 to **IO=3E8h; IRQ=5**, and then disable it.  
+    * Go back to the main UEFI setting.  
+    * Navigate to **Boot** menu option and select **UEFI: Built-in EFI Shell** as Boot Option #1.  
+      + Make sure that the rest boot options are set to **Disabled**.  
+    * Navigate to **Exit** menu option and select **Save changes and Reset**.  
+    * Press **Yes** in the prompt window and it will reboot then.  
+    * Wait for Supermicro MBD-X9SCL-F-0 to boot into UEFI shell.  
+    * Plug the USB drive prepared in 4) into Supermicro MBD-X9SCL-F-0's usb slot.  
+    * Input the following command at UEFI shell prompt, press enter key and it will route to UEFI shell again.  
+    * Check the device mapping table of the USB drive in UEFI shell. It is **fs0:** here for example.  
+    * Input the following command at UEFI shell prompt, press enter key and the prompt will show **fs0:\>** from now.  
+    * Input the following command at UEFI shell prompt and press the enter key.  
+      ```
+      fs0:>load PolegSerialDxe.efi  
+	  ```
+    * Input the following command at UEFI shell prompt and press the enter key.  
+      ```
+	  fs0:>load TerminalDxe.efi  
+	  ```
+    * Unplug the usb drive.  
+    * Input the following command at UEFI shell prompt and it will route to the UEFI setting. 
 
 7. Prepare a PC or use a virtual pc software to install Ubuntu 14.04, 64 bit on your workstation.  
-  * Boot Ubuntu and log in as a normal user.
+    * Boot Ubuntu and log in as a normal user.
 
 8. Open a terminal in Ubuntu 14.04. Steps to install and execute software for SOL:
 
-  * Install git:  
-    + Input the following command in the opened terminal and press enter key:  
-      ```
-      sudo apt-get install git  
-	  ```
-  * Install Nodejs. 
-    + Input the following command in the opened terminal and press enter key:  
-      ```
-	  curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -  
-	  ```
-    + Input the following command in the opened terminal and press enter key:  
-      ```
-	  sudo apt-get install -y nodejs  
-	  ```
-    + install build tools. Input the following command in the opened terminal and press enter key:  
-      ```
-	  sudo apt-get install -y build-essential  
-	  ```
-  * Install phosphor-webui:  
-    + Download phosphor-webui. Input the following command in the opened terminal and press enter key:  
-      ```
-	  git clone https://github.com/openbmc/phosphor-webui.git  
-	  ```
-    + Navigate your working path to the phosphor-webui folder in the opened terminal. Then input the following command in the opened terminal and press enter key:  
-      ```
-	  npm install  
-	  ```
-    + Run phosphor-webui. Input the following command in the opened terminal and press enter key:  
-      ```
-	  npm run-script server  
-	  ```
+    * Install git:  
+      + Input the following command in the opened terminal and press enter key:  
+        ```
+        sudo apt-get install git  
+	    ```
+    * Install Nodejs. 
+      + Input the following command in the opened terminal and press enter key:  
+        ```
+	    curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -  
+	    ```
+      + Input the following command in the opened terminal and press enter key:  
+        ```
+	    sudo apt-get install -y nodejs  
+	    ```
+      + install build tools. Input the following command in the opened terminal and press enter key:  
+        ```
+	    sudo apt-get install -y build-essential  
+	    ```
+    * Install phosphor-webui:  
+      + Download phosphor-webui. Input the following command in the opened terminal and press enter key:  
+        ```
+	    git clone https://github.com/openbmc/phosphor-webui.git  
+	    ```
+      + Navigate your working path to the phosphor-webui folder in the opened terminal. Then input the following command in the opened terminal and press enter key:  
+        ```
+	    npm install  
+	    ```
+      + Run phosphor-webui. Input the following command in the opened terminal and press enter key:  
+        ```
+	    npm run-script server  
+	    ```
 
 9. Configure the ethernet communication between Ubuntu 14.04 and Poleg EVB:
 
-  * Connect an ethernet cable between the PC running Ubuntu 14.04 and J7 header of Poleg EVB.  
-  * Configure Ubuntu 14.04 ip address to 192.168.0.1 and the netmask to 255.255.255.0 as an example here.  
-  * Configure Poleg EVB ip address to 192.168.0.2 and the netmask to 255.255.255.0. For example, input the following command in the terminal connected to Poleg EVB on your workstation and press enter key:  
-    ```
-	ifconfig eth0 192.168.0.2 netmask 255.255.255.0
-	```
+    * Connect an ethernet cable between the PC running Ubuntu 14.04 and J7 header of Poleg EVB.  
+    * Configure Ubuntu 14.04 ip address to 192.168.0.1 and the netmask to 255.255.255.0 as an example here.  
+    * Configure Poleg EVB ip address to 192.168.0.2 and the netmask to 255.255.255.0. For example, input the following command in the terminal connected to Poleg EVB on your workstation and press enter key:  
+      ```
+	  ifconfig eth0 192.168.0.2 netmask 255.255.255.0
+	  ```
 
 10. Run SOL:
 
-  * Launch a browser in Ubuntu 14.04, open a tab window and navigate to https://192.168.0.2.  
-  * By pass the secure warning. You will see a JSON response with Login required message.  
-  * In the same tab window, navigate to http://localhost:8080. Enter the BMC IP (which is 192.168.0.2 as an example here, Username and Password (defaults: root/0penBmc)).  
-  * You will see the OpenBMC management screen.  
-  * Click **Server control** at the left side of the OpenBMC management screen.  
-  * A **Serial over LAN console** menu item prompts then and click it.  
-  * A specific area will display the UEFI setting of Supermicro MBD-X9SCL-F-0.  
-  * (Optional) If the area doesn't display the UEFI setting clearly, use the mouse pointer to click in the area and press the **Esc** key.  
-    + It shows a prompt window named **Exit Without Saving**, choose **No** and press enter key to refresh the area for showing UEFI setting entirely.
+    * Launch a browser in Ubuntu 14.04, open a tab window and navigate to https://192.168.0.2.  
+    * By pass the secure warning. You will see a JSON response with Login required message.  
+    * In the same tab window, navigate to http://localhost:8080. Enter the BMC IP (which is 192.168.0.2 as an example here, Username and Password (defaults: root/0penBmc)).  
+    * You will see the OpenBMC management screen.  
+    * Click **Server control** at the left side of the OpenBMC management screen.  
+    * A **Serial over LAN console** menu item prompts then and click it.  
+    * A specific area will display the UEFI setting of Supermicro MBD-X9SCL-F-0.  
+    * (Optional) If the area doesn't display the UEFI setting clearly, use the mouse pointer to click in the area and press the **Esc** key.  
+      + It shows a prompt window named **Exit Without Saving**, choose **No** and press enter key to refresh the area for showing UEFI setting entirely.
 
-** Maintainer **
+**Maintainer**
 
 * Tyrone Ting
 * Stanley Chu
