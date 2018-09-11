@@ -247,7 +247,88 @@ It's verified with Nuvoton's NPCM750 solution and Supermicro MBD-X9SCL-F-0.
   * LDAP
 
 ### Time
-  * SNTP
+  * **SNTP**  
+  	Network Time Protocol (NTP) is a networking protocol for clock synchronization between computer systems over packet-switched, variable-latency data networks.
+    
+    **systemd-timesyncd** is a daemon that has been added for synchronizing the system clock across the network. It implements an **SNTP (Simple NTP)** client. This daemon runs with minimal privileges, and has been hooked up with **systemd-networkd** to only operate when network connectivity is available.
+        
+    The modification time of this file indicates the timestamp of the last successful synchronization (or at least the **systemd build date**, in case synchronization was not possible).
+    > _/var/lib/systemd/timesync/clock_
+    
+    **Source URL**
+    * [https://github.com/systemd/systemd/tree/master/src/timesync](https://github.com/systemd/systemd/tree/master/src/timesync)
+    
+    **How to use**  
+    * Enable NTP  
+      ```
+      timedatectl set-ntp true  
+      ```
+      >_timedatectl result will show **systemd-timesyncd.service active: yes**_ 
+
+      If NTP is Enabled and network is Connected (Using **eth2** connect to router), we will see the item **systemd-timesyncd.service active** is **yes** and **System clock synchronized** is **yes**. Thus, system time will sync from NTP server to get current time.
+    * Get NTP status  
+      ```
+      timedatectl  
+      ```
+      >_Local time: Mon 2018-08-27 09:24:51 UTC  
+      >Universal time: Mon 2018-08-27 09:24:51 UTC  
+      >RTC time: n/a  
+      >Time zone: n/a (UTC, +0000)  
+      >**System clock synchronized: yes**  
+      >**systemd-timesyncd.service active: yes**  
+      >RTC in local TZ: no_  
+      
+    * Disable NTP  
+      ```
+      timedatectl set-ntp false  
+      ```
+      >_timedatectl result will show **systemd-timesyncd.service active: no**_  
+      
+    * Using Local NTP server Configuration  
+    When starting, systemd-timesyncd will read the configuration file from **/etc/systemd/timesyncd.conf**, which looks like as below: 
+        >_[Time]  
+        >\#NTP=  
+        >\#FallbackNTP=time1.google.com time2.google.com time3.google.com time4.google.com_  
+	
+    	By default, systemd-timesyncd uses the Google Public NTP servers **time[1-4].google.com**, if no other NTP configuration is available. To add time servers or change the provided ones, **uncomment** the relevant line and list their host name or IP separated by a space. For example, we setup NB windows 10 system as NTP server with IP **192.168.1.128**  
+        >_[Time]  
+        >**NTP=192.168.1.128**  
+    	>\#FallbackNTP=time1.google.com time2.google.com time3.google.com time4.google.com_
+
+    * Poleg connect to local NTP server of windows 10 system  
+      Connect to NB through **eth0** EMAC interface, and set static IP **192.168.1.15**  
+
+      ```
+      ifconfig eth0 up
+      ifconfig eth0 192.168.1.15
+      ```  
+      >_Note: Before that you need to setup your NTP server (192.168.1.128) on Windows 10 system first_  
+      
+      Modify **/etc/systemd/timesyncd.conf** file on Poleg as we mentioned
+        >_[Time]  
+        >**NTP=192.168.1.128**_  
+      
+      Re-start NTP to make effect about our configuration change  
+      ```
+      systemctl restart systemd-timesyncd.service
+      ```  
+      Check status of NTP that show already synced to our local time server 
+      ```
+      systemctl status systemd-timesyncd.service -l --no-pager
+      ```  
+      >_Status: "Synchronized to time server 192.168.1.128:123 (192.168.1.128)."_  
+      
+      Verify **Web-UI** `Server overview`->`BMC time` whether sync from NTP server as same as **timedatectl**. (Note: timedatectl time zone default is UTC, thus you will find the BMC time is UTC+8)
+      ```
+      timedatectl  
+      ```
+      >_Local time: Thu 2018-09-06 07:24:16 UTC  
+      >Universal time: Thu 2018-09-06 07:24:16 UTC  
+      >RTC time: n/a  
+      >Time zone: n/a (UTC, +0000)  
+      >System clock synchronized: yes  
+      >systemd-timesyncd.service active: yes  
+      >RTC in local TZ: no_  
 
 ### Sensor
   * Enabled Sensor Types
@@ -430,3 +511,4 @@ It's verified with Nuvoton's NPCM750 solution and Supermicro MBD-X9SCL-F-0.
 * 2018.08.02 First release SOL
 * 2018.08.07 Modify Readme.md for adding description about SOL How to use
 * 2018.08.13 Update vcd and ece patch, rename remote-kvm to obmc-ikvm
+* 2018.09.10 Update System/Time/SNTP
