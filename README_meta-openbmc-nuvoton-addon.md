@@ -602,7 +602,7 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 | Device ID | V | V | V |
 | Cold Reset |  |  |  |
 | Warm Reset |  |  |  |
-| Get Self Test Results |  |  |  |
+| Get Self Test Results | V |  |  |
 | Manufacturing Test On |  |  |  |
 | Set ACPI Power State |  |  |  |
 | Get ACPI Power State |  |  |  |
@@ -625,12 +625,12 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 | Set BMC Global Enables |  |  |  |
 | Get BMC Global Enables |  |  |  |
 | Clear Message Flags |  |  |  |
-| Get Message Flags |  |  |  |
+| Get Message Flags | V |  | V |
 | Enable Message Channel Receive |  |  |  |
-| Get Message |  |  |  |
+| Get Message | V |  |  |
 | Send Message | V |  |  |
-| Read Event Message Buffer |  |  |  |
-| Get System GUID |  |  |  |
+| Read Event Message Buffer | V |  | V |
+| Get System GUID | V |  | V |
 | Set System Info Parameters |  |  |  |
 | Get System Info Parameters |  |  |  |
 | Get Channel Authentication Capabilities |  | V |  |
@@ -668,7 +668,7 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 | Get Chassis Status |  |  |  |
 | Chassis Control |  |  |  |
 | Chassis Reset |  |  |  |
-| Chassis Identify |  | V |  |
+| Chassis Identify | V |  | V |
 | Set Front Panel Button Enables |  |  |  |
 | Set Chassis Capabilities |  |  |  |
 | Set Power Restore Policy |  |  |  |
@@ -726,16 +726,16 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 | Exit SDR Repository Update Mode |  |  |  |
 | Run Initialization Agent |  |  |  |
 | **SEL Device Commands** |  |  |  |
-| Get SEL Info |  |  |  |
+| Get SEL Info | V |  | V |
 | Get SEL Allocation Info |  |  |  |
-| Reserve SEL |  |  |  |
-| Get SEL Entry |  |  |  |
-| Add SEL Entry |  |  |  |
+| Reserve SEL | V |  | V |
+| Get SEL Entry | V |  | V |
+| Add SEL Entry | V |  | V |
 | Partial Add SEL Entry |  |  |  |
-| Delete SEL Entry |  |  |  |
-| Clear SEL |  |  |  |
-| Get SEL Time |  |  |  |
-| Set SEL Time |  |  |  |
+| Delete SEL Entry | V |  | V |
+| Clear SEL | V |  | V |
+| Get SEL Time | V |  | V |
+| Set SEL Time | V |  | V |
 | Get Auxiliary Log Status |  |  |  |
 | Set Auxiliary Log Status |  |  |  |
 | Get SEL Time UTC Offset |  |  |  |
@@ -766,3 +766,4 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 * 2018.09.07 Update SOL for WebUI and IPMI
 * 2018.09.10 Update System/Time/SNTP
 * 2018.09.11 Update KCS to IPMB part of Message Bridging
+* 2018.09.12 Update IPMI Comamnds Verified Table
