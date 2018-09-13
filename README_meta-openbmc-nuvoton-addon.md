@@ -74,32 +74,47 @@ BBLAYERS ?= " \
 
 ### OBMC iKVM
 
-This is a Virtual Network Computing (VNC) server programm using [LibVNCServer](https://github.com/Nuvoton-Israel/libvncserver).
+This is a Virtual Network Computing (VNC) server programm using our modified [LibVNCServer](https://github.com/Nuvoton-Israel/libvncserver).
+1. Support Video Capture and Differentiation(VCD), compares frame by hardware.
+2. Support Encoding Compression Engine(ECE), 16-bit hextile compression hardware encoding.
+3. Support USB HID, support Keyboard and Mouse.
 
-In order to support some hardware features of Nuvoton's NPCM750, please use our modified [LibVNCServer](https://github.com/Nuvoton-Israel/libvncserver) to build this program.
-1. Add Video Capture and Differentiation(VCD), compares frame by hardware.
-2. Add Encoding Compression Engine(ECE), 16-bit hextile compression hardware encoding.
-3. Add USB HID, support Keyboard and Mouse.
+The VNC viewer also enabled in webui with below patches.
+1. [Implement KVM in webui using novnc module](https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/blob/openbmc-master/recipes-phosphor/webui/files/0001-Implement-KVM-in-webui.patch)
+	* This patch is provided by [Ed tanous](ed@tanous.net).
+2. [Remove sending sec-websocket-protocol in novnc module](https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/blob/openbmc-master/recipes-phosphor/webui/phosphor-webui%25.bbappend)
 
 **Source URL**
 
 * [https://github.com/Nuvoton-Israel/obmc-ikvm](https://github.com/Nuvoton-Israel/obmc-ikvm)
+* [https://github.com/Nuvoton-Israel/libvncserver](https://github.com/Nuvoton-Israel/libvncserver)
 
 **How to use**
 
-1. launch obmc-ikvm
+1. Prepare a motherboard with a PCI-E slot at least.
+2. Plug Poleg EVB into motherboard with PCI-E connection.
+3. Connect a micro usb cable from your workstation to J1 header of Poleg EVB.
+4. Connect an ethernet cable between your workstation and J12 header of Poleg EVB.
+5. Power up the Poleg EVB and motherboard.
+	* Noted the power on sequence to ensure the graphic of Poleg EVB is attached.
+      ```
+      Poleg EVB -> motherboard
+      ```
+6. Make sure the network is connected with your workstation.
+7. Launch a browser in your workstation and you will see the entry page.
     ```
-    ./obmc-ikvm &
+    https://<poelg ip>
     ```
-    > _Please skip this step if obmc-ikvm daemon is managed by systemd_
+8. Login to OpenBMC home page
+    ```
+    Username: root
+    Password: 0penBmc
+    ```
+9. Navigate to KVM viewer page
 
-2. open VNC viewer
-
     ```
-    IP xxx.xxx.xxx.xxx
-    port 5900
+    https://<poelg ip>/#kvm
     ```
-    > _Please choose hextile as preferred encoding._
 
 **Maintainer**
 
@@ -803,3 +818,4 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 * 2018.09.12 Update IPMI Comamnds Verified Table
 * 2018.09.13 Update Time settings of System/Time
 * 2018.09.13 Update KCS to IPMB part of Message Bridging about OpenBMC patches and Test message bridging
+* 2018.09.13 Update obmc-ikvm part for WebUI
