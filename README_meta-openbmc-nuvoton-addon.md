@@ -304,6 +304,46 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
       >systemd-timesyncd.service active: yes  
       >RTC in local TZ: no_  
 
+  * **Time settings**  
+    **Phosphor-time-manager** provides two objects on D-Bus
+      >_/xyz/openbmc_project/time/bmc  
+      >/xyz/openbmc_project/time/host_  
+
+      **BMC time** is used by journal event log record, and **Host time** is used by Host do IPMI Set SEL Time command to sync BMC time from Host mechanism in an era of BMC without any network interface.  
+      Currently, we cannot set Host time no matter what we use **busctl**, **REST API** or **ipmitool set time set** command. Due to **phosphor-settingd** this daemon set default TimeOwner is BMC and TimeSyncMethod is NTP. Thus, when TimeOwner is BMC that is not allow to set Host time anyway.
+
+      A summary of which cases the time can be set on BMC or HOST
+
+	  Mode      | Owner | Set BMC Time  | Set Host Time
+	  --------- | ----- | ------------- | -------------------
+	  NTP       | BMC   | Fail to set   | Not allowed (Default setting)
+	  NTP       | HOST  | Not allowed   | Not allowed
+	  NTP       | SPLIT | Fail to set   | OK
+	  NTP       | BOTH  | Fail to set   | Not allowed
+	  MANUAL    | BMC   | OK            | Not allowed
+	  MANUAL    | HOST  | Not allowed   | OK
+	  MANUAL    | SPLIT | OK            | OK
+	  MANUAL    | BOTH  | OK            | OK
+
+      If user would like to set Host time that need to set Owner to SPLIT in NTP mode or set Owner to HOST/SPLIT/BOTH in MANUAL mode. However, change Host time will not effect BMC time and journal event log timestamp.
+
+	**Set Time Owner to Split**
+	```
+	### With busctl on BMC
+    busctl set-property xyz.openbmc_project.Settings \
+       /xyz/openbmc_project/time/owner xyz.openbmc_project.Time.Owner \
+       TimeOwner s xyz.openbmc_project.Time.Owner.Owners.Split
+
+	### With REST API on remote host
+	curl -c cjar -b cjar -k -H "Content-Type: application/json" -X  PUT  -d \
+       '{"data": "xyz.openbmc_project.Time.Owner.Owners.Split" }' \
+       https://${BMC_IP}/xyz/openbmc_project/time/owner/attr/TimeOwner
+	```
+	**TimeZone**  
+    According OpenBMC current design that only support UTC TimeZone now, we can use below command to get current support TimeZone on Poleg
+    ```
+    timedatectl list-timezones
+    ```
 ### Sensor
   * Enabled Sensor Types
   * Event Generation
@@ -734,8 +774,8 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 | Partial Add SEL Entry |  |  |  |
 | Delete SEL Entry | V |  | V |
 | Clear SEL | V |  | V |
-| Get SEL Time | V |  | V |
-| Set SEL Time | V |  | V |
+| Get SEL Time | [V](#time) |  | V |
+| Set SEL Time | [V](#time)|  | V |
 | Get Auxiliary Log Status |  |  |  |
 | Set Auxiliary Log Status |  |  |  |
 | Get SEL Time UTC Offset |  |  |  |
@@ -767,3 +807,4 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 * 2018.09.10 Update System/Time/SNTP
 * 2018.09.11 Update KCS to IPMB part of Message Bridging
 * 2018.09.12 Update IPMI Comamnds Verified Table
+* 2018.09.13 Update Time settings of System/Time
