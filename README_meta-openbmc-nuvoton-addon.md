@@ -3,11 +3,11 @@ This README file contains information on the contents of the meta-openbmc-nuvoto
 
 Please see the corresponding sections below for details.
 
-- Work with [openbmc tag v2.3](https://github.com/openbmc/openbmc/tree/v2.3 "openbmc tag v2.3")
+- Work with [openbmc master branch](https://github.com/openbmc/openbmc/tree/master "openbmc master branch")
 - Work with [NTIL linux 4.13.05 for Poleg](https://github.com/Nuvoton-Israel/openbmc/tree/npcm7xx_v2.1 "NTIL")
 
 # Dependencies
-![](https://cdn.rawgit.com/NTC-CCBG/icons/73898d7f/label_openbmc_ver_2.3.svg) ![](https://cdn.rawgit.com/NTC-CCBG/icons/cb59d76c/label_linux_ver_4.13.05.svg)
+![](https://cdn.rawgit.com/maxdog988/icons/61485d57/label_openbmc_ver_master.svg) ![](https://cdn.rawgit.com/NTC-CCBG/icons/cb59d76c/label_linux_ver_4.13.05.svg)
 
 This layer depends on:
 
