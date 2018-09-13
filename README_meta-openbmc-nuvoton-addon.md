@@ -453,35 +453,24 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
     * Download [Nuvoton-Israel/meta-openbmc-nuvoton-addon](https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon) under the just-retrieved openbmc directory and follow the instructions in the section **[Usage](https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon#usage)**.  
     * Follow the instructions in the section **Setting up your OpenBMC project** of of [Nuvoton-Israel/openbmc](https://github.com/Nuvoton-Israel/openbmc) to build and program an OpenBMC image for Poleg EVB A.  
 
-7. Modify the following files corresponding to those in the downloaded openbmc directory of the build machine in step-6 for Poleg EVB B to meet the requirement of step-5.
+7. Download patches to meet the requirement of step-5 for Poleg EVB B.
 
-    * [https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/blob/openbmc-master/recipes-kernel/linux/files/0001-i2c-npcm750-enable-I2C-slave-support.patch](https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/blob/openbmc-master/recipes-kernel/linux/files/0001-i2c-npcm750-enable-I2C-slave-support.patch)  
-
-      | Line number  | Before modification  | After modification  |
-      | :---         | :---:                | :---:               |
-      | line 26      | ipmb\@40000010 \{ | ipmb\@40000058 \{  |
-
-    * [https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/blob/openbmc-master/recipes-kernel/linux/files/0001-i2c-npcm750-enable-I2C-slave-support.patch](https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/blob/openbmc-master/recipes-kernel/linux/files/0001-i2c-npcm750-enable-I2C-slave-support.patch)  
-
-      | Line number  | Before modification  | After modification  |
-      | :--- | :---: | :---: |
-      | line 28      | reg = <0x40000010>; | reg = <0x40000058>;  |
-
-    * [https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/blob/openbmc-master/recipes-phosphor/ipmi/phosphor-ipmi-ipmb/ipmbbridged.hpp](https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/blob/openbmc-master/recipes-phosphor/ipmi/phosphor-ipmi-ipmb/ipmbbridged.hpp)  
-
-      | Line number  | Before modification  | After modification  |
-      | :--- | :--- | :--- |
-      | line 30      | constexpr uint8_t ipmbRqSlaveAddress = 0x58; | constexpr uint8_t ipmbRqSlaveAddress = 0x10;  |
-
-    * [https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/blob/openbmc-master/recipes-phosphor/ipmi/phosphor-ipmi-ipmb/ipmbbridged.cpp](https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/blob/openbmc-master/recipes-phosphor/ipmi/phosphor-ipmi-ipmb/ipmbbridged.cpp)
-
-      | Line number  | Before modification  | After modification  |
-      | :--- | :---: | :---: |
-      | line 619      |  const char *ipmbI2cSlave = "/sys/bus/i2c/devices/4-1010/slave-mqueue"; |  const char *ipmbI2cSlave = "/sys/bus/i2c/devices/4-1058/slave-mqueue";  |
-
+    * Download [0001-i2c-npcm750-enable-I2C-slave-support.patch](https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/blob/openbmc-master/recipes-patches/recipes-kernel/linux/0001-i2c-npcm750-enable-I2C-slave-support.patch) and overwrite the same original file located under **meta-openbmc-nuvoton-addon/recipes-kernel/linux/files** folder in the downloaded openbmc directory of the build machine.  
     * In the build machine, rebuild the linux kernel for OpenBMC. As an example, enter the following command in a terminal window (build environment is configured in advance):  
       ```
       bitbake -C compile virtual/kernel
+      ```
+
+    * Download [kcs_to_ipmb_message_bridging.patch](https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/blob/openbmc-master/recipes-patches/recipes-phosphor/ipmi/phosphor-ipmi-ipmb/kcs_to_ipmb_message_bridging.patch) under the **meta-openbmc-nuvoton-addon/recipes-phosphor/ipmi/phosphor-ipmi-ipmb** folder in the downloaded openbmc directory of the build machine.  
+    * In the build machine, open a terminal window and navigate to the **meta-openbmc-nuvoton-addon/recipes-phosphor/ipmi/phosphor-ipmi-ipmb** folder in the downloaded openbmc directory.  
+    * Enter the following command in the terminal window in the build machine.  
+      ```
+      patch -p1 < ./kcs_to_ipmb_message_bridging.patch
+      ```
+
+    * In the build machine, rebuild the ipmbbridge for OpenBMC. As an example, enter the following command in a terminal window (build environment is configured in advance):  
+      ```
+      bitbake -C fetch phosphor-ipmi-ipmb
       ```
 
     * In the build machine, rebuild the OpenBmc image. As an example, enter the following two commands in a terminal window (build environment is configured in advance):  
@@ -489,6 +478,7 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
       bitbake obmc-phosphor-image -c cleansstate  
       bitbake obmc-phosphor-image
       ```
+
     * Follow the section **Programming the images** of [Nuvoton-Israel/openbmc](https://github.com/Nuvoton-Israel/openbmc) to program the updated image into Poleg EVB B.
 
 8. Modify the system interface driver in Ubuntu 14.04 on Supermicro MBD-X9SCL-F-0 to communicate with Poleg EVB A.
@@ -614,6 +604,12 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
     * Power up or reboot Supermicro MBD-X9SCL-F-0 and login into Ubuntu 14.04 as a normal user.  
       + Open a terminal window and execute **kcs_switch.sh** and **insert_ipmi_mod.sh** created in step-10 with the root privilege.
       + If the scripts are not created, input the contents of **kcs_switch.sh** and **insert_ipmi_mod.sh** except the #!/bin/sh line manually.
+      + The user can use the following command in a terminal window under Ubuntu 14.04 on Supermicro MBD-X9SCL-F-0 to verify Poleg system interface.
+        ```
+        dmesg | grep -i "bmc"
+        ```
+      
+      + The user can check the man_id. For example, the man_id is **0x000000** for this case.
     * Enter the following command in a terminal window as a normal user of Ubuntu 14.04 on Supermicro MBD-X9SCL-F-0.  
       ```
       sudo ipmiutil cmd 18 34 02 10 18 d8 20 0e 01 d1 -x -s -j -F kcs
@@ -626,8 +622,6 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
       ```
       > _The response to "Get Device ID" command might be "respData[len=26]: 1c 33 00 02 1e c2 58 00 01 00 00 00 02 03 02 00 00 00 00 00 00 00 00 00 00 a0"._
 
-
-  * Net to IPMB
 
 **Maintainer**
 
@@ -808,3 +802,4 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 * 2018.09.11 Update KCS to IPMB part of Message Bridging
 * 2018.09.12 Update IPMI Comamnds Verified Table
 * 2018.09.13 Update Time settings of System/Time
+* 2018.09.13 Update KCS to IPMB part of Message Bridging about OpenBMC patches and Test message bridging
