@@ -512,7 +512,7 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
     * Download [0001-i2c-npcm750-enable-I2C-slave-support.patch](https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/blob/openbmc-master/recipes-patches/recipes-kernel/linux/0001-i2c-npcm750-enable-I2C-slave-support.patch) and overwrite the same original file located under **meta-openbmc-nuvoton-addon/recipes-kernel/linux/files** folder in the downloaded openbmc directory of the build machine.  
     * In the build machine, rebuild the linux kernel for OpenBMC. As an example, enter the following command in a terminal window (build environment is configured in advance):  
       ```
-      bitbake -C compile virtual/kernel
+      bitbake -C fetch virtual/kernel
       ```
 
     * Download [kcs_to_ipmb_message_bridging.patch](https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/blob/openbmc-master/recipes-patches/recipes-phosphor/ipmi/phosphor-ipmi-ipmb/kcs_to_ipmb_message_bridging.patch) under the **meta-openbmc-nuvoton-addon/recipes-phosphor/ipmi/phosphor-ipmi-ipmb** folder in the downloaded openbmc directory of the build machine.  
@@ -688,13 +688,13 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 | :--- | :---: | :---: | :---: |
 | **IPM Device Global Commands** |  |  |  |
 | Device ID | V | V | V |
-| Cold Reset |  |  |  |
-| Warm Reset |  |  |  |
-| Get Self Test Results | V |  |  |
+| Cold Reset | V |  | V |
+| Warm Reset | V |  | V |
+| Get Self Test Results | V |  | V |
 | Manufacturing Test On |  |  |  |
-| Set ACPI Power State |  |  |  |
+| Set ACPI Power State | V |  | V |
 | Get ACPI Power State |  |  |  |
-| Get Device GUID |  |  |  |
+| Get Device GUID | V |  | V |
 | Get NetFn Support |  |  |  |
 | Get Command Support |  |  |  |
 | Get Command Sub-function Support |  |  |  |
@@ -706,9 +706,9 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 | Get Command Sub-function Enables |  |  |  |
 | Get OEM NetFn IANA Support |  |  |  |
 | **BMC Watchdog Timer Commands** |  |  |  |
-| Reset Watchdog Timer |  |  |  |
-| Set Watchdog Timer |  |  |  |
-| Get Watchdog Timer |  |  |  |
+| Reset Watchdog Timer | V |  | V |
+| Set Watchdog Timer | V |  | V |
+| Get Watchdog Timer | V |  | V |
 | **BMC Device and Messaging Commands** |  |  |  |
 | Set BMC Global Enables |  |  |  |
 | Get BMC Global Enables |  |  |  |
@@ -724,8 +724,8 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 | Get Channel Authentication Capabilities |  | V |  |
 | Get Session Challenge |  |  |  |
 | Activate Session |  |  |  |
-| Set Session Privilege Level |  |  |  |
-| Close Session |  |  |  |
+| Set Session Privilege Level |  | V |  |
+| Close Session |  | V |  |
 | Get Session Info |  |  |  |
 | Get AuthCode |  |  |  |
 | Set Channel Access |  |  |  |
@@ -737,9 +737,9 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 | Get User Name Command |  |  |  |
 | Set User Password Command |  |  |  |
 | Activate Payload |  | V |  |
-| Deactivate Payload |  |  |  |
-| Get Payload Activation Status |  |  |  |
-| Get Payload Instance Info |  |  |  |
+| Deactivate Payload |  | V |  |
+| Get Payload Activation Status |  | V |  |
+| Get Payload Instance Info |  | V |  |
 | Set User Payload Access |  |  |  |
 | Get User Payload Access |  |  |  |
 | Get Channel Payload Support |  |  |  |
@@ -779,7 +779,7 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 | Alert Immediate |  |  |  |
 | PET Acknowledge |  |  |  |
 | **Sensor Device Commands** |  |  |  |
-| Get Device SDR Info |  |  |  |
+| Get Device SDR Info | V |  | V |
 | Get Device SDR |  |  |  |
 | Reserve Device SDR Repository |  |  |  |
 | Get Sensor Reading Factors |  |  |  |
@@ -836,9 +836,9 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 | **Serial/Modem Device Commands** |  |  |  |
 | Set Serial/Modem Mux |  |  |  |
 | Set Serial Routing Mux |  |  |  |
-| SOL Activating |  | V |  |
-| Set SOL Configuration Parameters |  |  |  |
-| Get SOL Configuration Parameters |  |  |  |
+| SOL Activating |  |  |  |
+| Set SOL Configuration Parameters |  | V |  |
+| Get SOL Configuration Parameters |  | V |  |
 | **Command Forwarding Commands** |  |  |  |
 | Forwarded Command |  |  |  |
 | Set Forwarded Commands |  |  |  |
@@ -859,3 +859,4 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 * 2018.09.13 Update KCS to IPMB part of Message Bridging about OpenBMC patches and Test message bridging
 * 2018.09.13 Update obmc-ikvm part for WebUI
 * 2018.09.14 First release VM
+* 2018.09.14 Update IPMI Commands Verified Table
