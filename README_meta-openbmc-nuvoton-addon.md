@@ -228,6 +228,45 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 
 ### VM
 
+This is a Virtual Media (VM) to Simulate a USb drive on remote host PC via Network Block Device(NBD) and Mass Storage(MSTG).
+
+**Source URL**
+
+* [https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/recipes-support/nbd](https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/recipes-support/nbd)
+* [https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/recipes-kernel/linux](https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/recipes-kernel/linux)
+* [https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/recipes-phosphor/interfaces](https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/recipes-phosphor/interfaces)
+* [https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/recipes-phosphor/webui](https://github.com/Nuvoton-Israel/meta-openbmc-nuvoton-addon/recipes-phosphor/webui)
+
+**How to use**
+
+1. clone a usb drive to a image file
+```
+For Linux
+dd if=/dev/sda of=usb.img bs=1M count=100
+
+*bs is block size and count is block count
+*For Example, if the size of your usb drive is 1GB,
+*then you could set "bs=1M" and "count=1024"
+
+For Windows
+use tool like Win32DiskImager.exe
+```
+2. Switch to webpage of VM on your browser
+```
+https://XXX.XXX.XXX.XXX/#/vm
+
+* Please login to BMC first.
+```
+3. Operations of VM
+```
+After "Chose File", you could "Start VM"
+After "Start VM", you could "Mount USB" or "Stop VM"
+After "Mount USB", you could "UnMount USB"
+After "UnMount USB", you could "Stop VM" or "Mount USB"
+```
+**Maintainer**
+* Medad CChien
+
 ### Event Log Dump
 
 ## System
@@ -819,3 +858,4 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 * 2018.09.13 Update Time settings of System/Time
 * 2018.09.13 Update KCS to IPMB part of Message Bridging about OpenBMC patches and Test message bridging
 * 2018.09.13 Update obmc-ikvm part for WebUI
+* 2018.09.14 First release VM
