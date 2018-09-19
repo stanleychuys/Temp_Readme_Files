@@ -72,7 +72,7 @@ BBLAYERS ?= " \
 
 ## WebUI
 
-### OBMC iKVM
+### OBMC iKVM <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/e8178eef/openbmc/kvm.png">
 
 This is a Virtual Network Computing (VNC) server programm using our modified [LibVNCServer](https://github.com/Nuvoton-Israel/libvncserver).
 1. Support Video Capture and Differentiation(VCD), compares frame by hardware.
@@ -120,7 +120,7 @@ The VNC viewer also enabled in webui with below patches.
 
 * Joseph Liu
 
-### SOL
+### SOL <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/e8178eef/openbmc/sol-webui.png">
 
 The Serial over LAN (SoL) console redirects the output of the server’s serial port to a browser window on your workstation.
 
@@ -226,7 +226,7 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 * Tyrone Ting
 * Stanley Chu
 
-### VM
+### VM <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/e8178eef/openbmc/vm-own.png">
 
 This is a Virtual Media (VM) to Simulate a USb drive on remote host PC via Network Block Device(NBD) and Mass Storage(MSTG).
 
@@ -404,7 +404,7 @@ After "UnMount USB", you could "Stop VM" or "Mount USB"
 
 ## IPMI / DCMI
 
-### SOL IPMI
+### SOL IPMI <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/e8178eef/openbmc/sol-ipmi.png">
 
 The Serial over LAN (SoL) via IPMI redirects the output of the server’s serial port to a command/terminal window on your workstation.
 
