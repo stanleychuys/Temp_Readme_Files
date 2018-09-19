@@ -72,7 +72,7 @@ BBLAYERS ?= " \
 
 ## WebUI
 
-### OBMC iKVM
+### OBMC iKVM <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/e8178eef/openbmc/kvm.png">
 
 This is a Virtual Network Computing (VNC) server programm using our modified [LibVNCServer](https://github.com/Nuvoton-Israel/libvncserver).
 1. Support Video Capture and Differentiation(VCD), compares frame by hardware.
@@ -120,7 +120,7 @@ The VNC viewer also enabled in webui with below patches.
 
 * Joseph Liu
 
-### SOL
+### SOL <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/e8178eef/openbmc/sol-webui.png">
 
 The Serial over LAN (SoL) console redirects the output of the server’s serial port to a browser window on your workstation.
 
@@ -226,9 +226,9 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 * Tyrone Ting
 * Stanley Chu
 
-### VM
+### VM <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/e8178eef/openbmc/vm-own.png">
 
-This is a Virtual Media (VM) to Simulate a USb drive on remote host PC via Network Block Device(NBD) and Mass Storage(MSTG).
+Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Block Device(NBD) and Mass Storage(MSTG).
 
 **Source URL**
 
@@ -239,31 +239,31 @@ This is a Virtual Media (VM) to Simulate a USb drive on remote host PC via Netwo
 
 **How to use**
 
-1. clone a usb drive to a image file
-```
-For Linux
-dd if=/dev/sda of=usb.img bs=1M count=100
+1. Clone a physical usb drive to an image file
+    * For Linux - use tool like **dd**
+      ```
+      dd if=/dev/sda of=usb.img bs=1M count=100
+      ```
+      > **bs** here is block size and **count** is block count.
+      > 
+      > For example, if the size of your usb drive is 1GB, then you could set "bs=1M" and "count=1024"
 
-*bs is block size and count is block count
-*For Example, if the size of your usb drive is 1GB,
-*then you could set "bs=1M" and "count=1024"
+    * For Windows - use tool like **Win32DiskImager.exe**
 
-For Windows
-use tool like Win32DiskImager.exe
-```
+    > NOTICE : A simple *.iso file cannot work for this.
+ 
 2. Switch to webpage of VM on your browser
-```
-https://XXX.XXX.XXX.XXX/#/vm
+    ```
+    https://XXX.XXX.XXX.XXX/#/vm
+    ```
+    > Please login to BMC first.
 
-* Please login to BMC first.
-```
 3. Operations of VM
-```
-After "Chose File", you could "Start VM"
-After "Start VM", you could "Mount USB" or "Stop VM"
-After "Mount USB", you could "UnMount USB"
-After "UnMount USB", you could "Stop VM" or "Mount USB"
-```
+    * After `Chose File`, click `Start VM` to start VM network service (still not hook USB disk to host platform)
+    * After `Start VM`, click `Mount USB` to hook the emulated usb disk to host platform, or click `Stop VM` to stop VM network service.
+    * After `Mount USB`, click `UnMount USB` to emulate unplugging the usb disk from host platform
+    * After `UnMount USB`, click `Stop VM` to stop VM network service, or click `Mount USB` to hook USB disk to host platform.
+
 **Maintainer**
 * Medad CChien
 
@@ -404,7 +404,7 @@ After "UnMount USB", you could "Stop VM" or "Mount USB"
 
 ## IPMI / DCMI
 
-### SOL IPMI
+### SOL IPMI <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/e8178eef/openbmc/sol-ipmi.png">
 
 The Serial over LAN (SoL) via IPMI redirects the output of the server’s serial port to a command/terminal window on your workstation.
 
