@@ -468,7 +468,8 @@ BMC Message Bridging provides a mechanism for routing IPMI Messages between diff
 Please refer to [IPMI Website](https://www.intel.com/content/www/us/en/servers/ipmi/ipmi-home.html) for details about Message Bridging.
 
   * KCS to IPMB
-
+  <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/icons/522a8e05/kcs2ipmb.png">
+  
 The command "Send Message" is used to routing IPMI messages from KCS to IPMB via System Interface.
 
 Later, the response to the bridged request is received by the BMC and routed into the Receive Message Queue and it is retrieved using a Get Message command.
