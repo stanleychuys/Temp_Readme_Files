@@ -290,7 +290,10 @@ Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Bloc
     * [https://github.com/systemd/systemd/tree/master/src/timesync](https://github.com/systemd/systemd/tree/master/src/timesync)
     
     **How to use**  
-    * Enable NTP  
+    <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/f38b505/openbmc/ntp.png">
+    * Enable NTP by **Web-UI** `Server configuration`  
+      ->`Date and time settings`
+    * Enable NTP by command  
       ```
       timedatectl set-ntp true  
       ```
@@ -865,3 +868,4 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 * 2018.09.13 Update obmc-ikvm part for WebUI
 * 2018.09.14 First release VM
 * 2018.09.14 Update IPMI Commands Verified Table
+* 2018.09.21 Add NTP screen snapshot for System/Time/SNTP
