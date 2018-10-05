@@ -229,7 +229,7 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 * Stanley Chu
 
 ### VM
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/e8178eef/openbmc/vm-own.png">
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/91d6179/openbmc/vm-own.png">
 
 Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Block Device(NBD) and Mass Storage(MSTG).
 
@@ -869,3 +869,4 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 * 2018.09.14 First release VM
 * 2018.09.14 Update IPMI Commands Verified Table
 * 2018.09.21 Add NTP screen snapshot for System/Time/SNTP
+* 2018.10.05 Update webui and  patch of webui and interface and vm-own.png
