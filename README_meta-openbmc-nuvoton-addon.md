@@ -229,7 +229,7 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 * Stanley Chu
 
 ### VM
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/91d6179/openbmc/vm-own.png">
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/1ecfa33/openbmc/vm-own.png">
 
 Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Block Device(NBD) and Mass Storage(MSTG).
 
