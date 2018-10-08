@@ -65,6 +65,7 @@ BBLAYERS ?= " \
   * [IPMI / DCMI](#ipmi---dcmi)
     + [SOL IPMI](#sol-ipmi)
     + [Message Bridging](#message-bridging)
+  * [JTAG master](#jtag-master)
 - [IPMI Comamnds Verified](#ipmi-comamnds-verified)
 - [Modifications](#modifications)
 
@@ -690,6 +691,73 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 * Stanley Chu
 * Tyrone Ting
 
+## jtag master
+JTAG master is implemented as Jtag master function on Poleg EVB.
+
+**How to use**
+
+1. Prepare a Poleg EVB and a target board (in our test, we use NUC950).
+2. Connect pins of Jtag on NUC950 to Poleg EVB:
+    * Connect Jtag TCK pin to pin2 of J11 on Poleg EVB.
+    * Connect Jtag TDI pin to pin8 of J11 on Poleg EVB.
+    * Connect Jtag TDO pin to pin7 of J11 on Poleg EVB.
+    * Connect Jtag TMS pin to pin10 of J11 on Poleg EVB.
+    * Jtag RST pin is optional.
+3. Prepare Jtag driver module and Jtag socket svc deamon:
+    * Jtag driver module
+      * In the build machine, build module by:
+        ```
+        bitbake jtag-driver
+        ```
+      * Copy generated module "jtag_drv.ko" to Poleg EVB. "jtag_drv.ko" should be located at \<openbmc folder\>/build/tmp/work/evb_npcm750-openbmc-linux-gnueabi/jtag-driver/\<version\>/
+    * Jtag socket svc daemon:
+      * In the build machine, build daemon by:
+        ```
+        bitbake jtag-socket-svc
+        ```
+      * Copy generated daemon "jtag_socket_svc" to Poleg EVB. "jtag_socket_svc" should be loacted at \<openbmc folder\>/build/tmp/work/jtag-socket-svc/\<version\>/image/usr/bin/
+4. Prepare a guest PC and jtag client tool which will send At scale debug commands to daemon "jtag_socket_svc" on Poleg EVB via ethernet.
+    * Here is an example jtag client tool for NUC950 (target board)
+      * Download the example tool from https://github.com/Nuvoton-Israel/jtag_socket_client_arm
+      * Make sure that python3 is installed on the guest PC.
+5. Configure the ethernet communication between Poelg EVB and a guest PC:
+    * Connect an ethernet cable between your workstation and J12 header of Poleg EVB.
+    * Configure guest PC' ip address to 192.168.2.101 and the netmask to 255.255.255.0 as an example here.
+    * Configure Poleg EVB ip address to 192.168.2.100 and the netmask to 255.255.255.0. For example, input the following command in the terminal connected to Poleg EVB on your workstation and press enter key.
+      ```
+      ifconfig eth2 192.168.2.100 netmask 255.255.255.0
+      ```
+6. Run Jtag socket svc daemon:
+    * Insert Jtag driver module at first by inputing the following command in the terminal connected to Poleg EVB:
+      ```
+      insmod jtag_drv.ko
+      ```
+    * Run daemon "jtag_socket_svc" by inputing the following command in the terminal connected to Poleg EVB:
+      ```
+      ./jtag_socket_svc
+      ```
+    * Make sure the NUC950(target board) is powered on and Jtag connection is ready.
+    * Control NUC950(target board) via Jtag by jtag client tool on guest PC:
+      * Launch client jtag tool
+        ```
+        python jtag_client.py
+        ```
+      * List commands the jtag client tool supports:
+        ```
+        jtag_client>>>?
+        ```
+      * Halt the target board:
+        ```
+        jtag_client>>>halt
+        ```
+      * Restore the target board:
+        ```
+        jtag_client>>>go
+        ```
+**Maintainer**
+* Ray Lin
+* Stanley Chu
+
 # IPMI Comamnds Verified
 
 | Command | KCS | RMCP+ | IPMB |
@@ -870,3 +938,4 @@ It's verified with Nuvoton's NPCM750 solution (which is referred as Poleg here) 
 * 2018.09.14 Update IPMI Commands Verified Table
 * 2018.09.21 Add NTP screen snapshot for System/Time/SNTP
 * 2018.10.05 Update webui and  patch of webui and interface and vm-own.png
+* 2018.10.08 Add JTAG master
