@@ -11,14 +11,19 @@ The URL to ask for login. server will give a challenge, or failed the request.
     . | param_b |  desc for param b |param_b=yyy |
     path | \<n-th> | n-th obj's id | 1234 |
     
+    > Notice there must be a "space line" between table and previous/followed section for github markdown viewer.
   * Cookies
+  
     name | description | example |
     :-----|:----------- |:------- |
     sid | the sessionid got from rsp of url xxx |sid=xxx |
+    
   * Headers
+  
     name | description | example |
     :-----|:----------- |:------- |
     X-Auth-Token | auth token got from rsp of url xxx |X-Auth-Token xxx |
+    
   * Content
     * Content-Type : `application/json`
     * body content
@@ -38,13 +43,17 @@ The URL to ask for login. server will give a challenge, or failed the request.
       ```
 - Response 
   * Cookies
+  
     name | description | example |
     :-----|:----------- |:------- |
     cookie2 | desc for cookie2 |cookie2=xxx |
+    
   * Headers
+  
     name | description | example |
     :-----|:----------- |:------- |
     Location | next URL to get challenge |Location xxx |
+    
   * possible response
     * success (200 OK)
       * response Content-Type : `application/json`
