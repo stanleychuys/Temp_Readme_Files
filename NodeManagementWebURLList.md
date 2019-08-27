@@ -4,11 +4,13 @@ The URL to ask for login. server will give a challenge, or failed the request.
 - Method : POST
 - Request 
   * Parameters (sample)
+  
     Type | Param | description | example |
     :----|:-----|:----------- |:------- |
     query | param_a |  desc for param a |param_a=xxx |
     . | param_b |  desc for param b |param_b=yyy |
     path | \<n-th> | n-th obj's id | 1234 |
+    
   * Cookies
     name | description | example |
     :-----|:----------- |:------- |
