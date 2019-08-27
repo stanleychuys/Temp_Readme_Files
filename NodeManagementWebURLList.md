@@ -29,16 +29,20 @@ The URL to ask for login. server will give a challenge, or failed the request.
     * body content
       ```
       "field0": {
-    	// field1 : description for field 1
+      // field1 : description for field 1
         // type : string, ex : xxx
-    	field1: "xxx"
+    	"field1": "xxx",
     	// field2 : description for field 2
-        field2: {
-    	  // field3 : description for field 2
-          // type : integer, ex : 123
-          field3: 123
-          ...
-        }
+        // type : array of class_a, { 
+        //          string member1
+        //          int member2
+        //        }
+        // ex : [{"member1":"xxx","member2":123}, ...]
+    	"field2": [
+          {"member1":"xxx","member2":123},
+          {"member1":"yyy","member2":456},
+        ],
+        ...
       }
       ```
 - Response 
@@ -63,16 +67,6 @@ The URL to ask for login. server will give a challenge, or failed the request.
     	  // field1 : description for field 1
           // type : string, ex : xxx
     	  "field1": "xxx",
-    	  // field2 : description for field 2
-          // type : array of class_a, { 
-          //          string member1
-          //          int member2
-          //        }
-          // ex : [{"member1":"xxx","member2":123}, ...]
-    	  "field2": [
-            {"member1":"xxx","member2":123},
-            {"member1":"yyy","member2":456},
-          ],
           ...
         }
         ```
