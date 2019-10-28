@@ -36,6 +36,8 @@ Please submit any patches against the meta-runbmc-nuvoton layer to the maintaine
 - [Features of NPCM750 RunBMC Olympus](#features-of-npcm750-runbmc-olympus)
   * [WebUI](#webui)
     + [Remote KVM](#remote-kvm)
+  * [LDAP for User Management](#ldap-for-user-management)
+    + [LDAP Server Setup](#ldap-server-setup)
 - [Features In Progressing](#features-in-progressing)
 - [Features Planned](#features-planned)
 - [IPMI Commands Verified](#ipmi-commands-verified)
@@ -105,6 +107,286 @@ PreferredEncoding: Hextile
 **Maintainer**
 
 * Joseph Liu
+
+# LDAP for User Management
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/b6fdec0d/openbmc/ldap-login-via-ssh.png">
+<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/master/openbmc/access_ldap_via_poleg.PNG">
+
+The Lightweight Directory Access Protocol (LDAP) is an open, vendor-neutral, industry standard application protocol for accessing and maintaining distributed directory information services over an Internet Protocol (IP) network.
+
+LDAP is specified in a series of Internet Engineering Task Force (IETF) Standard Track publications called Request for Comments (RFCs), using the description language ASN.1.
+
+A common use of LDAP is to provide a central place to store usernames and passwords. This allows many different applications and services to connect to the LDAP server to validate users.
+
+**Source URL**
+
+* [https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-phosphor/nuvoton-layer/dlc/ldap-support-user-management](https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-phosphor/nuvoton-layer/dlc/ldap-support-user-management)
+* [https://github.com/Nuvoton-Israel/openbmc-util/tree/master/ldap_server](https://github.com/Nuvoton-Israel/openbmc-util/tree/master/ldap_server)
+
+### LDAP Server Setup
+
+**How to use**
+
+1. The user is expected to know how to follow the instructions in the section **Setting up your OpenBMC project** in [Nuvoton-Israel/openbmc](https://github.com/Nuvoton-Israel/openbmc) to build and program an OpenBMC image into Poleg platforms (The term **Poleg** is used hereafter). 
+    > _Prepare a PC which builds OpenBMC. (called the build machine hereafter)_  
+    > _The user is also expected to have knowledge of LDAP and its operations._
+
+2. Install Ubuntu 16.04 64 bit (called Ubuntu hereafter) on a PC which is used as a LDAP server and log in it with an account with root privilege.
+
+3. Set up the LDAP server and its configurations in Ubuntu. 
+
+    * Open a terminal and input the following commands to install required software packages in advance.
+
+      ```
+      sudo apt-get install git
+      sudo apt-get install libsasl2-dev
+      sudo apt-get install g++
+      wget http://download.oracle.com/berkeley-db/db-4.8.30.zip
+      unzip db-4.8.30.zip
+      cd db-4.8.30
+      cd build_unix/
+      ../dist/configure --prefix=/usr/local --enable-cxxmake
+      sudo make install
+      ```
+    * Install OpenSSL
+      + Download [openssl-1.0.2j.tar.gz](https://ftp.openssl.org/source/old/1.0.2/openssl-1.0.2j.tar.gz).
+      + Extract openssl-1.0.2j.tar.gz.
+      + Open a terminal, navigate to the extracted folder and input the following commands to install OpenSSL.
+        ```
+        ./config shared --prefix=/usr/local
+        make
+        make test
+        sudo make install
+        ```
+    * Install OpenLDAP
+      + Download OpenLDAP from [https://github.com/openldap/openldap](https://github.com/openldap/openldap)
+
+        > _git clone https://github.com/openldap/openldap_
+
+      + Open a terminal and input the following command to build and install OpenLDAP.
+        ```
+        ./configure CPPFLAGS="-I/usr/local/include -I/usr/local/include/openssl" LDFLAGS="-L/usr/local/lib -Wl,-rpath,/usr/local/lib" --prefix=/usr/local  --enable-syncprov=yes --enable-crypt=yes --enable-accesslog=yes --enable-auditlog=yes --enable-constraint=yes --enable-ppolicy=yes --enable-modules --enable-mdb --enable-spasswd --enable-debug=yes --enable-syslog --enable-slapd --enable-cleartext --enable-monitor --enable-overlays -with-threads --enable-rewrite --enable-syncprov=yes --with-tls=openssl 
+        ```
+          > _The description above is one line only._
+
+        ```
+        make depend 
+        make
+        sudo make install
+        ```
+    * Execute LDAP server
+      + Open a terminal and input the following command.
+
+        ```
+        sudo /usr/local/libexec/slapd -d 1 -h 'ldaps:/// ldap:/// ldapi:///'
+        ```
+          > _To stop LDAP server execution, press Ctrl key and C key at the same time in the terminal._  
+          > _Now please stop the LDAP server execution._
+
+    * Generate security configurations for the LDAP server running in Ubuntu.
+      > _Here a two-stage signing process is applied._  
+      > _You could also use the self-signed CA and cert for the configuration if your company uses them._
+
+      + Generate the CA key and cert. Open a terminal and input the following commands.
+        ```
+        openssl genrsa -out ca_server.key 2048  
+        openssl req -x509 -new -key ca_server.key -days 3650 -out ca_server.pem -subj '/C=OO/ST=OO/L=OO/O= OO/OU= OO /CN= OO'
+        ```
+
+        > _Define these **OO** for the arguments **C**, **ST**, etc. according to your configurations._  
+        > _Please refer to the following link for explanations of the arguments **C**, **ST**, etc._  
+        > _[https://www.shellhacks.com/create-csr-openssl-without-prompt-non-interactive/](https://www.shellhacks.com/create-csr-openssl-without-prompt-non-interactive/)._
+
+      + Generate the LDAP key and CSR. In the same terminal, input the following commands.
+        ```
+        openssl genrsa -out ldap_server.key 2048  
+        openssl req -new -key ldap_server.key -out ldap_server.csr -subj '/C=OO /ST=OO /L=OO/O=OO/OU=OO/CN=ldap.example.com'
+        ```
+
+        > _Define these **OO** for the arguments **C**, **ST**, etc. according to your configurations._  
+        > _Note that the field **CN** in ldap_server.csr must be set to the fully qualified domain name of the LDAP server._
+
+      + Generate ldap cert signed with CA cert. In the same terminal, input the following command.
+        ```
+        openssl x509 -req -days 365 -CA ca_server.pem -CAkey ca_server.key -CAcreateserial -CAserial serial -in ldap_server.csr -out ldap_server.pem
+        ```
+
+    * Store and specify locations of keys and certs.
+      + Edit /usr/local/etc/openldap/slapd.conf in Ubuntu with root privilege to update fields as examples shown below.
+        > _TLSCACertificateFile /etc/ldap/ca_certs.pem_  
+        > _TLSCertificateFile /etc/ssl/certs/ldap_server.pem_  
+        > _TLSCertificateKeyFile /etc/ssl/private/ldap_server.key_  
+        > _TLSCACertificatePath /etc/ldap_
+      
+      + Copy ca_certs.pem, ldap_server.pem and ldap_server.key into locations specified above with root privilege.
+
+    * Add LDAP schema and LDIF.
+      + Download [user_exp.schema](https://github.com/Nuvoton-Israel/openbmc-util/blob/master/ldap_server/schema/user_exp.schema) and save it at /usr/local/etc/openldap/schema with root privilege in Ubuntu.
+      + Modify /usr/local/etc/openldap/slapd.conf in Ubuntu with root privilege to specify the schema just saved.
+        > _include /usr/local/etc/openldap/schema/user_exp.schema_
+
+      + Download [bdn.ldif](https://github.com/Nuvoton-Israel/openbmc-util/blob/master/ldap_server/ldif/bdn.ldif), [ap_group.ldif](https://github.com/Nuvoton-Israel/openbmc-util/blob/master/ldap_server/ldif/ap_group.ldif), [bmc.ldif](https://github.com/Nuvoton-Israel/openbmc-util/blob/master/ldap_server/ldif/bmc.ldif), [group.ldif](https://github.com/Nuvoton-Israel/openbmc-util/blob/master/ldap_server/ldif/group.ldif), [people.ldif](https://github.com/Nuvoton-Israel/openbmc-util/blob/master/ldap_server/ldif/people.ldif) and [privRole.ldif](https://github.com/Nuvoton-Israel/openbmc-util/blob/master/ldap_server/ldif/privRole.ldif) to a temporary folder in Ubuntu.
+      + Open a terminal, navigate to the temporary folder for storing LDIF and input the following commands to add these LDIF into the LDAD server in Ubuntu.
+        ```
+        sudo slapadd -l ./bdn.ldif
+        sudo slapadd -l ./ap_group.ldif
+        sudo slapadd -l ./bmc.ldif
+        sudo slapadd -l ./group.ldif
+        sudo slapadd -l ./people.ldif
+        sudo slapadd -l ./privRole.ldif
+        ```
+
+    * Execute LDAP server.
+      + Open a terminal and input the following command in the terminal.
+      ```
+      sudo /usr/local/libexec/slapd -d 1 -h 'ldaps:/// ldap:/// ldapi:///'
+      ```
+
+4. Setup LDAP client configuration on Poleg.
+
+    * Open a terminal in the build machine and navigate to the directory which contains OpenBMC source codes. The directory is called **OPENBMCDIR** hereafter.
+      + Copy all directories and their containing files from [https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-phosphor/nuvoton-layer/dlc/ldap-support-user-management](https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-phosphor/nuvoton-layer/dlc/ldap-support-user-management) under OPENBMCDIR/meta-quanta/meta-runbmc-nuvoton directory according to their default hierarchy.
+        > _Nuvoton RunBMC Olympus is used for the LDAP demonstration so the corresponding runbmc software layer is applied here._
+
+    * Update OPENBMCDIR/meta-quanta/meta-runbmc-nuvoton/recipes-support/nss-pam-ldapd/files/nslcd.conf. (optional)
+      + The IP address for the LDAP server in Ubuntu is configured as **10.103.152.11**. Modify the field **uri ldap** in nslcd.conf according to your network configuration.
+        > _uri ldap://10.103.152.11/_
+
+      + The modification above is done in OpenBmc build time. If you would like to modify **uri** in OpenBmc run time, follow the instructions below after logging into Poleg in the console program (like Tera Term) with the root account (root/0penBmc).
+        > _The console program is used to display a debug console provided by Poleg._
+
+        ```
+        vi /etc/nslcd.conf
+        ```
+
+        > _Locate the line **uri ldap://10.103.152.11/**. Modify the field **uri ldap** according to your network configuration._
+
+        ```
+        systemctl stop nslcd
+        systemctl start nslcd
+        ```
+
+    * In the build machine, open a terminal window (build environment is configured in advance and the working directory is at OPENBMCDIR/build) to input the following commands to build the OpenBMC image.
+      ```
+      bitbake -C fetch nss-pam-ldapd
+      bitbake -C fetch dropbear
+      bitbake -C fetch libpam
+      bitbake -C fetch bmcweb
+      bitbake -C fetch phosphor-ipmi-net
+      bitbake -C fetch openldap
+      bitbake obmc-phosphor-image
+      ```
+    * Program the updated image into Poleg.
+
+5. Test LDAP server.
+
+    * Connect Poleg to the PC running Ubuntu with an ethernet cable and power on it.
+    * Log in Poleg from the console program (like Tera Term) with the root account (root/0penBmc).
+      > _The console program is used to display a debug console provided by Poleg._
+
+    * The IP address for the LDAP server is 192.168.0.101 for now.
+    * Set up IP addresses for Poleg and Ubuntu so that they can ping each other.
+      + For example, set Poleg's IP address to 192.168.0.2. Input the following command in the console program.
+        ```
+        ifconfig eth2 192.168.0.2
+        ```
+
+        > _Please replace **192.168.0.2** with your IP configuration for Poleg._
+
+    * Execute the following command in the console program.
+      ```
+      ldapsearch -ZZ -h 192.168.0.101 -D "cn=admin,dc=ldap,dc=example,dc=com" -b "dc=ldap,dc=example,dc=com" -w secret
+      ```  
+      > _Please replace **192.168.0.101** with your IP configuration for Ubuntu._  
+      > _The ldapsearch example is to display all the data stored in the LDAP server using a TLS connection._
+
+    * You could use the account **user1** stored in the LDAP server to log in WebUI running on Poleg.
+
+      + Some descriptions about the LDIF used by the LDAP server and authentication process are provided here. Please refer to the six snapshots in the following description.
+        > _To login using an account, the authentication logic has to check the following criteria._  
+        > _**bmc-uid**: It stands for the BMC machine that the account is used to login. The BMC machines are grouped by DN **ou=ap_group,dc=ldap,dc=example,dc=com**. One BMC machine can be in multiple groups at the same time. (see **ap_group** below)_  
+        <img width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/c8c60b29/openbmc/bmc1_info.png">
+        <img width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/c8c60b29/openbmc/bmc2_info.png">  
+        
+        > _**ap_group**: Applications like web server, email, ftp and so on are deployed on the servers attched by BMC machines. Therefore, grouping by applications is taken into the authentication process. The authentication refuses an account to log in some BMC machine if that machine is not deployed under the certain **ap_group** the account also joins._  
+        <img width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/c8c60b29/openbmc/email_info.png">
+        <img width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/c8c60b29/openbmc/webserver_info.png">  
+        
+        > _**people**: It contains the account information (login/privileges) stored in the LDAP server. An account can join multiple **ap_group** simutaneously._  
+        <img width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/c8c60b29/openbmc/user1_logininfo.png">
+        <img width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/c8c60b29/openbmc/user2_logininfo.png">  
+        
+        > _**user-login-disabled**: While this attribute's value is 1, it is not allowed to login with the account's membership of the specific **ap_group**_.  
+        > _**user-login-interface**: It's used as a channel via that the account logins for an **ap_group**. For example, **web** stands for logging in a BMC machine via WebUI. If **web** does not exist in any **user-login-interface** attributes an account owns under a certain ap_group, it means that the user cannot use this account to login as a member of the preferred ap_group via WebUI._
+
+      + Use an LDAP tool to modify the field **macAddress** of the DN **bmc-uid=bmc1,ou=bmc,dc=ldap,dc=example,dc=com** stored in the LDAP server.
+        > _The modification is to use the mac address of the ethernet module on Poleg you currently test with._
+
+      + To get the mac address desired, input the following command in the console program.
+        ```
+        ifconfig eth0
+        ```
+        > _Locate the keyword **HWaddr** displayed in the console program._  
+        > _Copy the value next to HWaddr to override the value of the field **macAddress** of the DN **bmc-uid=bmc1,ou=bmc,dc=ldap,dc=example,dc=com**._
+
+      + Launch a browser and navigate to the Poleg's IP address.
+        > _Bypass the secure warning and continue to the website._
+
+      + Use user1/123 to log in WebUI.
+        > _user1 is the login ID._  
+        > _123 is the login password._  
+        > _The **bmc-uid** for the BMC machine used for this test is bmc1. According to the LDIF provided, the BMC machine bmc1 is deployed under the **ap_group** email and the the BMC machine bmc2 is deployed under **ap_group** webserver. Also one can tell from the snapshots, user1 and user2 have different **user-login-interface** settings for the **ap_group** email and **ap_group** webserver respectively._  
+        > _User1 is able to log on bmc1 via WebUI since the following conditions are met: the BMC machine bmc1 is deployed under **ap_group** email.; user1 is a member of the **ap_group** email.; user1 has an **user-login-interface** setting as **web** for that group and value of user1's **user-login-disabled** attribute is not set._  
+        > _Although user2 is also a member of the **ap_group** email, it does not have an **user-login-interface** setting as **web** for that group. Under such conditions, user2 is not allowed to log on bmc1. User2 does have an **user-login-interface** setting as **web** for the **ap_group** webserver but bmc1 is not deployed under the **ap_group** webserver._  
+        > _The description above explains why user1 is used for this test._
+
+    * Password modification is also available to LDAP accounts via WebUI.
+      + Log in WebUI using user1/123 as mentioned in previous phrase.
+      + Navigate to `Access control` menu item on the left panel and select it.
+      + A sub menu item `Local users` pops up and select it.
+      + Modify the password value for user1 by selecting the icon at just the right side of the text area "Account status".
+
+      + Input the same new password twice.
+        > _The input locations are right below **USER PASSWORD** and **CONFIRM USER PASSWORD** text area._
+
+      + Press the `Save` button.
+        > _A message **Success! User has been updated successfully.** is expected to show then._
+
+      + Log out WebUI and login again with the new password for user1.
+
+    * Log in Poleg via SSH using an LDAP account.
+      + Make sure that configurations stated in Step 5 for Poleg and Ubuntu are set accordingly and ping between Ubuntu and Poleg is okay.
+      + Install **ssh** in Ubuntu with root privilege if ssh client is not available. Open a terminal and input the following command.
+        ```
+        sudo apt-get install ssh
+        ```
+
+      + Open a terminal in Ubuntu to log in Poleg using the LDAP account **user1** and its password via SSH. Input the following command in the terminal.
+        ```
+        ssh user1@192.168.0.2
+        ```
+        > _Please replace **192.168.0.2** with your IP configuration for Poleg._  
+        > _It requires the account to be in the priv-admin group in the LDAP group database for accessing SSH._  
+        > _Please refer to [group.ldif](https://github.com/Nuvoton-Israel/openbmc-util/blob/master/ldap_server/ldif/group.ldif) for more details._
+
+    * Execute ipmi commands using an LDAP account.
+      + Make sure that configurations stated in Step 5 for Poleg and Ubuntu are set accordingly and ping between Ubuntu and Poleg is okay.
+      + Install **ipmitool** in Ubuntu with root privilege for the demonstration purpose. Open a terminal and input the following command.
+        ```
+        sudo apt-get install ipmitool
+        ```
+
+      + Open a terminal in Ubuntu to execute ipmi commands to Poleg using the LDAP account **user2** and its password **123** via ipmitool. Input the following command in the terminal.
+        ```
+        sudo ipmitool -H 192.168.0.2 -U user2 -P 123 -I lanplus user list
+        ```
+        > _Please replace **192.168.0.2** with your IP configuration for Poleg._
+        > _Only limited ipmi commands are supported._
+
+**Maintainer**
+
+* Tyrone Ting
+
 
 ## Features In Progressing
 * Improve IPMI
