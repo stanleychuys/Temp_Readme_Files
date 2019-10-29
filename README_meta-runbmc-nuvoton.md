@@ -38,6 +38,9 @@ Please submit any patches against the meta-runbmc-nuvoton layer to the maintaine
     + [Remote KVM](#remote-kvm)
   * [LDAP for User Management](#ldap-for-user-management)
     + [LDAP Server Setup](#ldap-server-setup)
+  * [JTAG Master](#jtag-master)
+    + [ASD](#asd)
+    + [CPLD Programming](#cpld-programming)
 - [Features In Progressing](#features-in-progressing)
 - [Features Planned](#features-planned)
 - [IPMI Commands Verified](#ipmi-commands-verified)
@@ -387,6 +390,65 @@ A common use of LDAP is to provide a central place to store usernames and passwo
 
 * Tyrone Ting
 
+## JTAG Master
+JTAG master is implemented on BMC to facilitate debugging host CPU or programming CPLD device.  
+
+**Source URL**
+
+* [https://github.com/Intel-BMC/asd](https://github.com/Intel-BMC/asd)
+* [https://github.com/Nuvoton-Israel/openbmc-util/tree/master/loadsvf](https://github.com/Nuvoton-Israel/openbmc-util/tree/master/loadsvf)
+
+### ASD
+<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/870d09e/openbmc/asd.png">
+The Intel® At-Scale Debug feature allows for using any host system to run the Debug tool stack while connecting to the target system across the network. The target system must have a BMC which has physical connectivity to the JTAG pins as a minimum requirement of functionality.    
+
+**How to use**
+1. switch JPC1 jumper to 2-3
+2. configure GPIO40(BMC_XDP_JTAG_SEL_N) to connect BMC JTAG to Host CPU
+```
+echo 40 > /sys/class/gpio/export
+echo 0 > /sys/class/gpio/gpio40/value 
+```
+3. configure BMC_TCK_MUX_SEL pin to CPU TCK
+```
+echo 22 > /sys/class/gpio/export
+echo 1 > /sys/class/gpio/gpio22/value
+```
+3. Run ASD daemon on BMC
+```
+asd -u -n eth1 --log-level=warning -p 5123
+```
+4. Launch CScripts on debug host
+```
+Assume CScripts source folder = $CS, OpenIPC source folder = $OIPC
+Edit $OIPC/openipc/Config/SKX/SKX_ASD_RC-Pins.xml
+- Change ip address to BMC ip address
+Edit $OIPC/openipc/Config/OpenIpcConfig.xml
+- Change DefaultIpcConfig tag as <DefaultIpcConfig Name="SKX_ASD_RC-Pins"/>
+export IPC_PATH=$OIPC/openipc/Bin
+export LD_LIBRARY_PATH=$IPC_PATH
+Go to $CS/cscripts, execute "python startCscripts.py -a ipc"
+```
+5. Execute OpenIPC idcode operation in CScripts command prompt. It will show the TAP device's idcode.
+```
+>>> import ipccli
+>>> ipc = ipccli.baseaccess()
+>>> ipc.idcode(0)
+```
+
+
+### CPLD Programming
+The motherboard on server have a CPLD device that can be upgraded firmware on it. BMC can load svf file to program CPLD via JTAG.  
+
+**How to use**  
+run loadsvf on Runbmc to program CPLD. Specify the svf file name with -s.
+```
+loadsvf -d /dev/jtag0 -s firmware.svf
+```
+
+**Maintainer**
+* Stanley Chu
+
 
 ## Features In Progressing
 * Improve IPMI
@@ -394,7 +456,6 @@ A common use of LDAP is to provide a central place to store usernames and passwo
 * Host firmware update
 * System event policy
 * Sytem logs
-* Intel ASD
 
 ## Features Planned
 * PLDM
