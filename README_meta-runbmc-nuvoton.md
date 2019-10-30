@@ -41,6 +41,7 @@ Please submit any patches against the meta-runbmc-nuvoton layer to the maintaine
   * [JTAG Master](#jtag-master)
     + [ASD](#asd)
     + [CPLD Programming](#cpld-programming)
+  * [System Event Policy](#system-event-policy)
 - [Features In Progressing](#features-in-progressing)
 - [Features Planned](#features-planned)
 - [IPMI Commands Verified](#ipmi-commands-verified)
@@ -449,12 +450,42 @@ loadsvf -d /dev/jtag0 -s firmware.svf
 **Maintainer**
 * Stanley Chu
 
+## System Event Policy
+
+phosphor-dbus-monitor service can watch on specific dbus objects/properties and perform predefined event callbacks when the property state has changed or meets the condition defined in config file.  
+
+**Source URL**
+* [phosphor-dbus-monitor](https://github.com/openbmc/phosphor-dbus-monitor)
+
+
+### Event Callbacks
+The event callbacks can be the following actions. Logging to journal or elog, calling d-bus method, or sending snmp trap. Here is an example that log to journal and send d-bus message to shutdown host when the specific temperature sensor reaches the critical high threshold.  
+
+* [Example config](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-runbmc-nuvoton/recipes-phosphor/configuration/runbmc-nuvoton-yaml-config/runbmc-nuvoton-dbus-monitor-config.yaml)
+
+### SNMP trap
+**How to use** 
+1. Install snmp trap receiver on the management server. Refer to the [link](https://blog.cadena-it.com/linux-tips-how-to/snmp-trap-receiver-with-ubuntu/) for the installation. 
+2. Specify snmp manager ip/port in openbmc WebUI
+```
+Server configuration
+  -> SNMP settings
+     -> Add Managers
+        -> enter the snmp manger ip and port(default is 162)
+```
+3. Check snmp trap log in snmp manager.
+```
+/var/log/snmptt/snmpttunknown.log
+```
+
+
+**Maintainer**
+* Stanley Chu
 
 ## Features In Progressing
 * Improve IPMI
 * Improve Redfish
 * Host firmware update
-* System event policy
 * Sytem logs
 
 ## Features Planned
