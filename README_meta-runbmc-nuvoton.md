@@ -456,6 +456,7 @@ phosphor-dbus-monitor service can watch on specific dbus objects/properties and 
 
 **Source URL**
 * [phosphor-dbus-monitor](https://github.com/openbmc/phosphor-dbus-monitor)
+* [phosphor-snmp](https://github.com/openbmc/phosphor-snmp)
 
 
 ### Event Callbacks
@@ -465,19 +466,29 @@ The event callbacks can be the following actions. Logging to journal or elog, ca
 
 ### SNMP trap
 **How to use** 
-1. Install snmp trap receiver on the management server. Refer to the [link](https://blog.cadena-it.com/linux-tips-how-to/snmp-trap-receiver-with-ubuntu/) for the installation. 
+1. Install snmp trap receiver on the management server. Refer to the [link](https://blog.cadena-it.com/linux-tips-how-to/snmp-trap-receiver-with-ubuntu/) for the installation.
+    * Copy [BMC notification MIB](https://github.com/openbmc/phosphor-snmp/blob/master/mibs/NotificationMIB.txt) to /usr/share/snmp/mibs.
+    * Run snmptrapd with -m option to load custom MIB
+       * snmptrapd -m OPENBMC-NOTIFICATION-MIB -Lf /var/log/snmptrap.log -f
 2. Specify snmp manager ip/port in openbmc WebUI
-```
-Server configuration
-  -> SNMP settings
-     -> Add Managers
-        -> enter the snmp manger ip and port(default is 162)
-```
+   ```
+    Server configuration
+     -> SNMP settings
+       -> Add Managers
+          -> enter the snmp manger ip and port(default is 162)
+    ```
 3. Check snmp trap log in snmp manager.
-```
-/var/log/snmptt/snmpttunknown.log
-```
-
+   * /var/log/snmptrap.log
+   * the OIDs in log file will be translated to human readable string defined in MIB
+   * Example:
+   ```
+   TRAP2, SNMP v2c, community publicDU Attribute/Value Pair Array:
+   SNMPv2-SMI::snmpModules.1.1.4.1.0 = OID: OPENBMC-NOTIFICATION-MIB::obmcErrorNotification
+   OPENBMC-NOTIFICATION-MIB::obmcErrorID = Gauge32: 135
+   OPENBMC-NOTIFICATION-MIB::obmcErrorTimestamp = Opaque: UInt64: 780329535445925888
+   OPENBMC-NOTIFICATION-MIB::obmcErrorSeverity = INTEGER: 3
+   OPENBMC-NOTIFICATION-MIB::obmcErrorMessage = STRING:   "xyz.openbmc_project.Sensor.Threshold.Error.WarningLow"
+   ```
 
 **Maintainer**
 * Stanley Chu
