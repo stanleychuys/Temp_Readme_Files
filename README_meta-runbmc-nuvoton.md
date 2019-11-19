@@ -42,6 +42,9 @@ Please submit any patches against the meta-runbmc-nuvoton layer to the maintaine
     + [ASD](#asd)
     + [CPLD Programming](#cpld-programming)
   * [System Event Policy](#system-event-policy)
+  * [In-Band Firmware Update](#in-band-firmware-update)
+    + [HOST Tool](#host-tool)
+    + [IPMI Library](#ipmi-library)
 - [Features In Progressing](#features-in-progressing)
 - [Features Planned](#features-planned)
 - [IPMI Commands Verified](#ipmi-commands-verified)
@@ -493,10 +496,117 @@ The event callbacks can be the following actions. Logging to journal or elog, ca
 **Maintainer**
 * Stanley Chu
 
+## In-Band Firmware Update
+This is a secure flash update mechanism to update HOST/BMC firmware via LPC/PCI.
+
+**Source URL**
+
+* [https://github.com/Nuvoton-Israel/phosphor-ipmi-flash](https://github.com/Nuvoton-Israel/phosphor-ipmi-flash)
+* [https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-phosphor/nuvoton-layer/recipes-phosphor/ipmi/phosphor-ipmi-flash_%25.bbappend](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-phosphor/nuvoton-layer/recipes-phosphor/ipmi/phosphor-ipmi-flash_%25.bbappend)
+
+### HOST Tool
+<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/322d0d3/openbmc/in-band-fu.png">The host-tool depends on ipmi-blob-tool and pciutils.
+
+#### Building pciutils
+Check out the [pciutils source](https://github.com/pciutils/pciutils).
+
+Then run these commands in the source directory.
+```
+make SHARED=yes
+make SHARED=yes install
+make install-lib
+```
+
+#### Building ipmi-blob-tool
+Check out the [ipmi-blob-tool source](https://github.com/openbmc/ipmi-blob-tool).
+Then run these commands in the source directory.
+
+```
+./bootstrap.sh
+./configure
+make
+make install
+```
+
+#### Building burn_my_bmc (the host-tool)
+Check out the [phosphor-ipmi-flash source](https://github.com/Nuvoton-Israel/phosphor-ipmi-flash).
+Then run these commands in the source directory.
+If you choose "enable-nuvoton-p2a-vga", then the tool will support LPC and PCI-VGA.
+If you choose "enable-nuvoton-p2a-mbox", then the tool will support LPC and PCI-MailBox
+
+```
+./bootstrap.sh
+./configure --disable-build-bmc-blob-handler --enable-nuvoton-p2a-vga
+make
+make install
+```
+
+**How to use**
+1. If you want to do firmware update over LPC, then you need to check the memory address which BIOS allocates for LPC.
+You could use "ioport" tool and following commands to get the address.
+
+```
+sudo outb 0x4e 0x07
+sudo outb 0x4f 0x0f
+
+# Host address a7-a0
+sudo outb 0x4e 0xF4
+sudo inb 0x4f
+
+# Host address a15-a8
+sudo outb 0x4e 0xF5
+sudo inb 0x4f
+
+# Host address a23-a16
+sudo outb 0x4e 0xF6
+sudo inb 0x4f
+
+# Host address a32-a24
+sudo outb 0x4e 0xF7
+sudo inb 0x4f
+
+# shm active?
+sudo outb 0x4e 0x30
+sudo inb 0x4f
+
+```
+2. Here is an example for upadting over LPC,and --length is fixed.
+
+```
+sudo ./burn_my_bmc --command update --interface ipmilpc --image image-bmc --sig image-bmc.sig --type image --address 0x817e0000 --length 0x1000
+```
+3. Here is an example for upadting over PCI(both VGA and MailBox)and --type is fixed
+
+```
+sudo ./burn_my_bmc --command update --interface ipmipci --image image-bmc --sig image-bmc.sig --type image
+```
+
+### IPMI Library
+This is an OpenBMC IPMI Library (Handler) for In-Band Firmware Update.
+
+**How to use**
+1.You need to enable the way you want to transfer data from host to bmc
+
+```
+nuvoton-lpc
+enable-nuvoton-p2a-mbox
+enable-nuvoton-p2a-vga
+```
+
+2.select the corresponding address for IPMI_FLASH_BMC_ADDRESS_nuvoton
+
+```
+0x7F400000
+0xF0848000
+0xc0008000
+```
+
+**Maintainer**
+* Medad CChien
+
 ## Features In Progressing
 * Improve IPMI
 * Improve Redfish
-* Host firmware update
 * Sytem logs
 
 ## Features Planned
