@@ -36,6 +36,7 @@ Please submit any patches against the meta-runbmc-nuvoton layer to the maintaine
 - [Features of NPCM750 RunBMC Olympus](#features-of-npcm750-runbmc-olympus)
   * [WebUI](#webui)
     + [Remote KVM](#remote-kvm)
+    + [Virtual Media](#virtual-media)
   * [LDAP for User Management](#ldap-for-user-management)
     + [LDAP Server Setup](#ldap-server-setup)
   * [JTAG Master](#jtag-master)
@@ -600,6 +601,43 @@ enable-nuvoton-p2a-vga
 0xF0848000
 0xc0008000
 ```
+
+**Maintainer**
+* Medad CChien
+
+### Virtual Media
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/3bf2693/openbmc/vm.png">
+
+Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Block Device(NBD) and Mass Storage(MSTG).
+
+**Source URL**
+
+* [https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-phosphor/nuvoton-layer/recipes-connectivity/jsnbd](https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-phosphor/nuvoton-layer/recipes-connectivity/jsnbd)
+
+**How to use**
+
+1. Clone a physical usb drive to an image file
+    * For Linux - use tool like **dd**
+      ```
+      dd if=/dev/sda of=usb.img bs=1M count=100
+      ```
+      > _**bs** here is block size and **count** is block count._
+      >
+      > _For example, if the size of your usb drive is 1GB, then you could set "bs=1M" and "count=1024"_
+
+    * For Windows - use tool like **Win32DiskImager.exe**
+
+    > _NOTICE : A simple *.iso file cannot work for this._
+
+2. Login and switch to webpage of VM on your browser
+    ```
+    https://XXX.XXX.XXX.XXX/#/server-control/virtual-media
+    ```
+
+3. Operations of Virtual Media
+    * After `Choose File`, click `Start` to start VM network service
+    * After clicking `Start`, you will see a new usb device on HOST OS
+    * If you want to stop this service, just click `Stop` to stop VM network service.
 
 **Maintainer**
 * Medad CChien
