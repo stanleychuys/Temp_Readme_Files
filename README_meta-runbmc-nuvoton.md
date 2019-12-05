@@ -37,6 +37,7 @@ Please submit any patches against the meta-runbmc-nuvoton layer to the maintaine
   * [WebUI](#webui)
     + [Remote KVM](#remote-kvm)
     + [Virtual Media](#virtual-media)
+    + [BIOS update](#bios-update)
   * [LDAP for User Management](#ldap-for-user-management)
     + [LDAP Server Setup](#ldap-server-setup)
   * [JTAG Master](#jtag-master)
@@ -115,6 +116,85 @@ PreferredEncoding: Hextile
 **Maintainer**
 
 * Joseph Liu
+
+### BIOS update
+<img align="right" width="40%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/0771b2f/openbmc/bios_update_demo.PNG">
+  This BIOS update function is implemented according to Openbmc firmware update mechanism. Users can update BIOS just like they update BMC firmware via web UI.
+
+
+**Source URL**
+
+* [https://github.com/Nuvoton-Israel/phosphor-bmc-code-mgmt](https://github.com/Nuvoton-Israel/phosphor-bmc-code-mgmt)
+* [commit](https://github.com/Nuvoton-Israel/phosphor-bmc-code-mgmt/commit/e7264acd23663320e50064d6dabeaebfa08bfdec)
+
+**How to use**
+
+* Prepare the BIOS image for update
+
+  1. MANIFEST
+
+      The manifest for BIOS must set *purpose=xyz.openbmc_project.Software.Version.VersionPurpose.Host*, and provide version information.
+      Others information just set as BMC manifest.
+      ```
+      purpose=xyz.openbmc_project.Software.Version.VersionPurpose.Host
+      version=F0B_1B01.07
+      KeyType=OpenBMC
+      HashType=RSA-SHA256
+      ```
+
+  2. BIOS firmware
+
+      rename BIOS image to image-bios
+      ```
+      mv BIOS image-bios
+      ```
+
+  3. public key
+
+      Prepare your own key pair for sign BIOS firmware, and put the public key in image. Then sign the image-bios as following command:
+      ```
+      openssl dgst -sha256 -sign userkey.priv -out image-bios.sig image-bios
+      ```
+  4. Sign MANIFEST and public key
+
+      Follow the BMC update signature verify flow, we also need sign MANIFEST and user public key by BMC system key.
+      ```
+      openssl dgst -sha256 -sign OpenBMC.priv -out MANIFEST.sig MANIFEST
+      openssl dgst -sha256 -sign OpenBMC.priv -out publickey.sig publickey
+      ```
+
+  5. Collect data and tar image
+
+      Now we have six files, and we just need tar them to a file.
+      ```
+      tar -cf image-bios.tar image-bios image-bios.sig MANIFEST MANIFEST.sig publickey publickey.sig
+      ```
+
+* Update BIOS
+
+  1. WebUI
+
+      Upload tar image, and active it.
+      ```
+      Server configuration
+       -> Firmware
+         -> Choose file (select image-bios.tar)
+         -> Click "Upload firmware" button
+         -> Click "Active" link
+             -> Select "ACTIVATE FIRMWARE FILE AND AUTOMATICALLY REBOOT SERVER"
+             -> Click Continue
+      ```
+
+  2. Redfish
+
+      We can update BIOS image via REST API just like BMC image. And the image will apply immediately after uploaded by default.
+      ```
+      curl -X POST -H "x-auth-token: ${token}" --data-binary image-bios.tar https://${BMC_IP}/redfish/v1/UpdateService
+      ```
+
+**Maintainer**
+
+* Brian Ma
 
 # LDAP for User Management
 <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/b6fdec0d/openbmc/ldap-login-via-ssh.png">
@@ -857,3 +937,5 @@ image-rwfs    |  0 MB  | middle layer of the overlayfs, rw files in this partiti
 # Modifications
 
 * 2019.10.01 First release ReadME.md
+* 2019.11.20 First release VM, In-Band Firmware Update
+* 2019.12.05 Add BIOS update function via web UI part
