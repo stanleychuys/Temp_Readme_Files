@@ -36,7 +36,9 @@ Please submit any patches against the meta-runbmc-nuvoton layer to the maintaine
 - [Features of NPCM750 RunBMC Olympus](#features-of-npcm750-runbmc-olympus)
   * [WebUI](#webui)
     + [Remote KVM](#remote-kvm)
+    + [Serial Over Lan](#serial-over-lan)
     + [Virtual Media](#virtual-media)
+    + [BMC Firmware Update](#bmc-firmware-update)
     + [BIOS update](#bios-update)
   * [LDAP for User Management](#ldap-for-user-management)
     + [LDAP Server Setup](#ldap-server-setup)
@@ -116,6 +118,87 @@ PreferredEncoding: Hextile
 **Maintainer**
 
 * Joseph Liu
+
+### Serial Over Lan
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/e8178eef/openbmc/sol-webui.png">
+
+The Serial over LAN (SoL) console redirects the output of the server’s serial port to a browser window on your workstation.
+
+This is a patch for enabling SOL in [phosphor-webui](https://github.com/openbmc/phosphor-webui) on Nuvoton's NPCM750.
+
+The patch provides the [obmc-console](https://github.com/openbmc/obmc-console) configuration.
+
+It's verified with Nuvoton's NPCM750 Olympus solution and Quanta RunBMC.
+
+**Source URL**
+
+* [https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/console](https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/console)
+
+**How to use**
+
+1. Setup serial console in Olympus host (Ubuntu as example)
+    * reference: [Ubuntu 16.04: GRUB2 and Linux with serial console](https://www.hiroom2.com/2016/06/06/ubuntu-16-04-grub2-and-linux-with-serial-console/)
+    * Set value as following in /etc/default/grub
+    ```
+    GRUB_CMDLINE_LINUX="console=tty console=ttyS1,57600"
+    ```
+    * Then make grub.cfg
+    ```
+    sudo grub-mkconfig -o /boot/grub/grub.cfg
+    ```
+
+2. Run SOL:
+
+    * Launch a browser in your workstation and navigate to https://${BMC_IP}
+    * Bypass the secure warning and continue to the website.
+    * Enter the BMC Username and Password (defaults: **root/0penBmc**).
+    * You will see the OpenBMC management screen.
+    * Click `Server control` at the left side of the OpenBMC management screen.
+    * A `Serial over LAN console` menu item prompts then and click it.
+    * Power on host server.
+    * A specific area will display the host ttyS1 that user can operate host OS.
+
+**Maintainer**
+
+* Tyrone Ting
+
+
+### BMC Firmware Update
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/0f22742/openbmc/firmware-update.png">
+
+This is a secure flash update mechanism to update BMC firmware via WebUI.
+
+**Source URL**
+
+* [https://github.com/Nuvoton-Israel/phosphor-bmc-code-mgmt](https://github.com/Nuvoton-Israel/phosphor-bmc-code-mgmt)
+
+**How to use**
+
+1. Upload update package from webui, then you will see
+    ```
+    Activate
+    ```
+    > if you select activate, then you will see activation dialog at item 2
+
+    ```
+    Delete
+    ```
+    > If you select delete, then the package will be deleted right now
+
+2. Confirm BMC firmware file activation
+    ```
+    ACTIVATE FIRMWARE FILE WITHOUT REBOOTING BMC
+    ```
+    > if you select this, you need to reboot BMC manually, and shutdown application will run update script to flash image into spi flash
+
+    ```
+    ACTIVATE FIRMWARE FILE AND AUTOMATICALLY REBOOT BMC
+    ```
+    > if you select this, BMC will shutdown right now, and shutdown application will run update script to flash image into spi flash
+
+**Maintainer**
+
+* Medad CChien
 
 ### BIOS update
 <img align="right" width="40%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/0771b2f/openbmc/bios_update_demo.PNG">
@@ -939,3 +1022,4 @@ image-rwfs    |  0 MB  | middle layer of the overlayfs, rw files in this partiti
 * 2019.10.01 First release ReadME.md
 * 2019.11.20 First release VM, In-Band Firmware Update
 * 2019.12.05 Add BIOS update function via web UI part
+* 2019.12.09 Update Serail Over Lan(SOL) and BMC Firmware update
