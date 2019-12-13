@@ -65,7 +65,7 @@ Please submit any patches against the meta-runbmc-nuvoton layer to the maintaine
 ## WebUI
 
 ### Remote KVM
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/e8178eef/openbmc/kvm.png">
+<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/master/openbmc/ipkvm.PNG">
 
 This is a Virtual Network Computing (VNC) server programm using [LibVNCServer](https://github.com/LibVNC/libvncserver).
 1. Support Video Capture and Differentiation(VCD), compares frame by hardware.
@@ -124,7 +124,7 @@ PreferredEncoding: Hextile
 * Joseph Liu
 
 ### Serial Over Lan
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/e8178eef/openbmc/sol-webui.png">
+<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/master/openbmc/SOL.PNG">
 
 The Serial over LAN (SoL) console redirects the output of the server’s serial port to a browser window on your workstation.
 
@@ -297,7 +297,7 @@ This is a secure flash update mechanism to update BMC firmware via WebUI.
     * [https://github.com/systemd/systemd/tree/master/src/timesync](https://github.com/systemd/systemd/tree/master/src/timesync)
     
     **How to use**
-    <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/f38b505/openbmc/ntp.png">
+    <img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/master/openbmc/Time.PNG">
     * Enable NTP by **Web-UI** `Server configuration`
       ->`Date and time settings`
     * Enable NTP by command
@@ -534,7 +534,7 @@ This is a secure flash update mechanism to update BMC firmware via WebUI.
 * Stanley Chu
 
 ### LED
-<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/db6eec1/openbmc/led.png">  
+<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/master/openbmc/ServerLed.PNG">  
 
 Turning on ServerLED via WebUI will make **identify** leds on BMC start blinking,
  and **heartbeat** will start blinklin after BMC booted.
