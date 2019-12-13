@@ -44,6 +44,9 @@ Please submit any patches against the meta-runbmc-nuvoton layer to the maintaine
     + [Time](#time)
     + [Sensor](#sensor)
     + [LED](#led)
+    + [FAN](#fan)
+    + [BIOS POST Code](#bios-post-code)
+    + [FRU](#fru)
   * [LDAP for User Management](#ldap-for-user-management)
     + [LDAP Server Setup](#ldap-server-setup)
   * [JTAG Master](#jtag-master)
@@ -565,6 +568,139 @@ Turning on ServerLED via WebUI will make **identify** leds on BMC start blinking
 **Maintainer**
 
 * Stanley Chu
+
+### FAN
+In NPCM750, we support four FAN slots and FAN RPMS will dynamic adjustment according temperature variation.
+
+**Source URL**
+
+Default Web-UI only show one Fan Tach Fan1, and NPCM750 support four Fan Tach. Thus, we modify this file to support four Fan Tach.
+* [https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/sensors/phosphor-hwmon/obmc/hwmon/ahb/apb/pwm-fan-controller%40103000.conf](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/sensors/phosphor-hwmon/obmc/hwmon/ahb/apb/pwm-fan-controller%40103000.conf)
+
+**How to use**
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/5745760/openbmc/fan.png">
+
+* Monitor FAN RPMS by **Web-UI** `Server health`
+  ->`Sensors`
+* Enable FAN dynamic adjustment with temperature variation by command
+  ```
+  systemctl start obmc-chassis-poweron@0.target
+  ```
+
+  This command will trigger systemd to execute chassis poweron target this unit. And you can use the following command to slmulate FAN control function.
+* Test FAN RPMS by command
+  ```
+  echo 25 > /sys/class/hwmon/hwmon2/pwm1
+  echo 50 > /sys/class/hwmon/hwmon2/pwm2
+  echo 100 > /sys/class/hwmon/hwmon2/pwm3
+  echo 255 > /sys/class/hwmon/hwmon2/pwm6
+  ```
+  We can set pwm value (0-255) for pwm1-3, and 6 to control FAN1-4 RPMS value by echo command and the result will show on Web-UI
+
+**Maintainer**
+* Tim Lee
+
+
+### BIOS POST Code
+In Poleg, we support a FIFO for monitoring BIOS POST Code. Typically, this feature is used by the BMC to "watch" host boot progress via port 0x80 writes made by the BIOS during the boot process.
+
+**Source URL**
+
+This is a patch for enabling BIOS POST Code feature in [phosphor-host-postd](https://github.com/openbmc/phosphor-host-postd) on Nuvoton's NPCM750.
+
+* [https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/host/phosphor-host-postd_%25.bbappend](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/host/phosphor-host-postd_%25.bbappend)
+
+    **How to use**
+
+    * Execute BIOS POST Code test program by command in BMC
+      ```
+      snooper
+      ```
+
+      This command will trigger snooper test program to record BIOS POST Code from port 0x80 of host and save to file with timestamp filename in Poleg for each host power on or reset.
+      > _Saved filename format example: 2019_4_30_11_52_35_ON_
+
+    * Server Power on
+
+      Press `Power on` button from `Server control` ->`Server power operations` of WebUI.
+      During server power on, snooper test program will print received BIOS POST Code on screen and record to file in Poleg at the same time.
+      > _Snooper test program print received BIOS POST Code example:_
+        > _recv: 0x3
+           recv: 0x2
+           recv: 0x7_
+
+**Maintainer**
+* Tim Lee
+
+### FRU
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/d95b6d0/openbmc/fru.png">
+
+Field Replaceable Unit. The FRU Information is used to primarily to provide “inventory” information about the boards that the FRU Information Device is located on. In Poleg, we connect EEPROM component as FRU Information Device to support this feature. Typically, this feature is used by the BMC to "monitor" host server health about H/W copmonents status.
+
+**Source URL**
+
+This is a patch for enabling FRU feature in [phosphor-impi-fru](https://github.com/openbmc/ipmi-fru-parser) on Nuvoton's NPCM750.
+
+* [https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/ipmi/phosphor-ipmi-fru_%25.bbappend](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/ipmi/phosphor-ipmi-fru_%25.bbappend)
+
+**How to use**
+* Modify DTS settings of EEPROM for FRU.
+  For example about DTS **nuvoton-npcm750-evb.dts**:
+  ```
+  i2c4: i2c@84000 {
+      #address-cells = <1>;
+      #size-cells = <0>;
+      bus-frequency = <100000>;
+      status = "okay";
+      eeprom@54 {
+          compatible = "atmel,24c64";
+          reg = <0x54>;
+      };
+  };
+  ```
+
+  According DTS modification, you also need to remember modify your EEPROM file description content about **SYSFS_PATH** and **FRUID**. Below is example for our EEPROM file description **[motherboard](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/ipmi/phosphor-ipmi-fru/obmc/eeproms/system/chassis/motherboard)**:
+  ```
+  SYSFS_PATH=/sys/bus/i2c/devices/3-0050/eeprom
+  FRUID=1
+  ```
+  **SYSFS_PATH** is the path according your DTS setting and **FRUID** is arbitrary number but need to match **Fruid** in **[config.yaml](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/configuration/olympus-nuvoton-yaml-config/olympus-nuvoton-ipmi-fru.yaml)** file. Below is example for when **Fruid** set as 1:
+  ```
+  1: #Fruid
+    /system/chassis/motherboard:
+      entityID: 7
+      entityInstance: 1
+      interfaces:
+        xyz.openbmc_project.Inventory.Decorator.Asset:
+          BuildDate:
+            IPMIFruProperty: Mfg Date
+            IPMIFruSection: Board
+          PartNumber:
+            IPMIFruProperty: Part Number
+            IPMIFruSection: Board
+          Manufacturer:
+            IPMIFruProperty: Manufacturer
+            IPMIFruSection: Board
+          SerialNumber:
+            IPMIFruProperty: Serial Number
+            IPMIFruSection: Board
+        xyz.openbmc_project.Inventory.Item:
+          PrettyName:
+            IPMIFruProperty: Name
+            IPMIFruSection: Board
+        xyz.openbmc_project.Inventory.Decorator.Revision:
+          Version:
+            IPMIFruProperty: FRU File ID
+            IPMIFruSection: Board
+  ```
+
+* Server health
+
+  Select `Server health` -> `Hardware status` on **Web-UI** will show FRU Board Info/Chassis Info/Product Info area.
+
+**Maintainer**
+* Tim Lee
+
 
 # LDAP for User Management
 <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/b6fdec0d/openbmc/ldap-login-via-ssh.png">
@@ -1311,4 +1447,5 @@ image-rwfs    |  0 MB  | middle layer of the overlayfs, rw files in this partiti
 * 2019.12.05 Add BIOS update function via web UI part
 * 2019.12.09 Update Serail Over Lan(SOL) and BMC Firmware update
 * 2019.12.11 Update Time settings of System/Time
-* 2019.12.13 Update Sensors, LED
+* 2019.12.13 Update Sensors, and LED
+* 2019.12.13 Update Fan, BIOS POST code, and FRU
