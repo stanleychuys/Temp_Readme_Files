@@ -40,6 +40,7 @@ Please submit any patches against the meta-runbmc-nuvoton layer to the maintaine
     + [Virtual Media](#virtual-media)
     + [BMC Firmware Update](#bmc-firmware-update)
     + [BIOS update](#bios-update)
+    + [Server Power Operations](#server-power-operations)
   * [System](#system)
     + [Time](#time)
     + [Sensor](#sensor)
@@ -171,6 +172,42 @@ It's verified with Nuvoton's NPCM750 Olympus solution and Quanta RunBMC.
 
 * Tyrone Ting
 
+### Virtual Media
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/3bf2693/openbmc/vm.png">
+
+Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Block Device(NBD) and Mass Storage(MSTG).
+
+**Source URL**
+
+* [https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-phosphor/nuvoton-layer/recipes-connectivity/jsnbd](https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-phosphor/nuvoton-layer/recipes-connectivity/jsnbd)
+
+**How to use**
+
+1. Clone a physical usb drive to an image file
+    * For Linux - use tool like **dd**
+      ```
+      dd if=/dev/sda of=usb.img bs=1M count=100
+      ```
+      > _**bs** here is block size and **count** is block count._
+      >
+      > _For example, if the size of your usb drive is 1GB, then you could set "bs=1M" and "count=1024"_
+
+    * For Windows - use tool like **Win32DiskImager.exe**
+
+    > _NOTICE : A simple *.iso file cannot work for this._
+
+2. Login and switch to webpage of VM on your browser
+    ```
+    https://XXX.XXX.XXX.XXX/#/server-control/virtual-media
+    ```
+
+3. Operations of Virtual Media
+    * After `Choose File`, click `Start` to start VM network service
+    * After clicking `Start`, you will see a new usb device on HOST OS
+    * If you want to stop this service, just click `Stop` to stop VM network service.
+
+**Maintainer**
+* Medad CChien
 
 ### BMC Firmware Update
 <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/0f22742/openbmc/firmware-update.png">
@@ -287,6 +324,87 @@ This is a secure flash update mechanism to update BMC firmware via WebUI.
 **Maintainer**
 
 * Brian Ma
+
+### Server Power Operations
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/1adf1a3/openbmc/pwoer_ops.png">
+
+Server Power Operations are using to Power on/Warm reboot/Cold reboot/Orderly shutdown/Immediate shutdown remote host PC.
+
+**Source URL**
+
+* [https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/chassis](https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/chassis)
+
+**How to use**
+
+2. Configure reaction of power button on generic host OS
+    * When host OS is running **Linux** and you press **PWRON** header on motherboard, you're prompted with a list of options - this is the **interactive** shutdown. The OS will go **Orderly shutdown** for a while if you didn't select any action from it. If you don't want this interactive shutdown pop up and hope OS go **Orderly shutdown** directly, you can enter below command in terminal before testing:
+      ```
+      gsettings set org.gnome.settings-daemon.plugins.power button-power 'shutdown'
+      ```
+    * When host OS is running **Windows** and you press **PWRON** header on motherboard, the default reaction is **Orderly shutdown**. Thus, you didn't need to configure reaction of power button in Windows. But, if you find the default reaction is not **Orderly shutdown**, please check `Control Panel`->`Power Options`->`System Settings` in Windows OS.
+
+    * About Watchdog patch
+
+      There is a package **phosphor-watchdog** included in OpenBMC now. The watchdog daemon is started on host's power on, which is used to monitor if host is alive. In normal case, when host starts, it will send IPMI commands to kick watchdog and so everything would work fine. If host fails to start, the watchdog eventually timeout. However, the default watchdog timeout action is **HardReset** which is defined at [Watchdog.interface.yaml](https://github.com/openbmc/phosphor-dbus-interfaces/blob/master/xyz/openbmc_project/State/Watchdog.interface.yaml) in **phosphor-dbus-interfaces** that will cause host rebooted after power on.
+
+3. Configure GPIO pin definitions for **POWER_SW**, **RESET_SW** and **PGOOD** on BMC
+
+    * Pin **POWER_SW** (GPIO505) is use to do all server power operations, pin **RESET_SW** (GPIO504) is reserve for reset operations, and **PGOOD** (GPIO506) is use to monitor DC real status that indicate `Server power` in WebUI.
+
+    * If other GPIO pins are preferred, please modify the file [gpio_defs.json](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/skeleton/obmc-libobmc-intf/gpio_defs.json).
+
+    * Content below is a part of **gpio_defs.json** for this sample:
+      ```
+      "power_config": {
+          "power_good_in": "PGOOD",
+          "power_up_outs": [
+              {"name": "POWER_UP_PIN", "polarity": false},
+              {"name": "POWER_UP_PIN", "polarity": true}
+          ]
+      }
+
+      "name": "PGOOD",
+      "num": 506,
+      "direction": "in"
+
+      "name": "POWER_UP_PIN",
+      "num": 505,
+      "direction": "out"
+
+      "name": "RESET_UP_PIN",
+      "num": 504,
+      "direction": "out"
+      ```
+      > _"name" here is referred in code and fixed, please don't modify it. "num"  means GPIO pin number and changeable here, "direction" should be set as "in" for **PGOOD**, "out" for **RESET_UP_PIN** and **POWER_UP_PIN**, and "polarity" should be set as "false" then set as "true" for **POWER_UP_PIN** accordind NPCM750 schematic._
+
+4. Server Power on
+    * Press `Power on` button from `Server control` ->`Server power operations` of WebUI.
+
+      > _[obmc-host-start@.target](https://github.com/openbmc/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-host-start%40.target) is the one driving the boot of the system._
+
+5. Server Power off (Soft)
+    * Press `Orderly shutdown` button from `Server control` ->`Server power operations` of WebUI.
+
+      > _The soft server power off function is encapsulated in the [obmc-host-shutdown@.target](https://github.com/openbmc/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-host-shutdown%40.target) that is soft in that it notifies the host of the power off request and gives it a certain amount of time to shut itself down._
+
+6. Server Power off (Hard)
+    * Press `Immediate shutdown` button from `Server control` ->`Server power operations` of WebUI.
+
+      > _The hard server power off is encapsulated in the [obmc-chassis-hard-poweroff@.target](https://github.com/openbmc/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-chassis-hard-poweroff%40.target) that will force the stopping of the soft power off service if running, and immediately cut power to the system._
+
+7. Server Reboot (Warm)
+    * Press `Warm reboot` button from `Server control` ->`Server power operations` of WebUI.
+
+      > _The warm reboot of the server is encapsulated in the [obmc-host-reboot@.target](https://github.com/openbmc/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-host-reboot%40.target) that will utilize the server power off (soft) target [obmc-host-shutdown@.target](https://github.com/openbmc/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-host-shutdown%40.target) and then, once that completes, start the host power on target [obmc-host-start@.target](https://github.com/openbmc/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-host-start%40.target)._
+
+8. Server Reboot (Cold)
+    * Press `Cold reboot` button from `Server control` ->`Server power operations` of WebUI.
+
+      > _The cold reboot of the server is shutdown server immediately, then restarts it. This target will utilize the Immediate shutdown target [obmc-chassis-hard-poweroff@.target](https://github.com/openbmc/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-chassis-hard-poweroff%40.target) and then, start the host power on target [obmc-host-start@.target](https://github.com/openbmc/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-host-start%40.target)._
+
+**Maintainer**
+* Tim Lee
+
 
 ## System
 
@@ -706,7 +824,7 @@ This is a patch for enabling FRU feature in [phosphor-impi-fru](https://github.c
 ## IPMI / DCMI
 
 ### SOL IPMI
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/4ce3198/openbmc/sol_ipmi_win10.PNG">
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/8afa8a2/openbmc/sol_ipmi_win10.PNG">
 
 The Serial over LAN (SoL) via IPMI redirects the output of the server’s serial port to a command/terminal window on your workstation.
 
@@ -1241,42 +1359,6 @@ enable-nuvoton-p2a-vga
 **Maintainer**
 * Medad CChien
 
-### Virtual Media
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/3bf2693/openbmc/vm.png">
-
-Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Block Device(NBD) and Mass Storage(MSTG).
-
-**Source URL**
-
-* [https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-phosphor/nuvoton-layer/recipes-connectivity/jsnbd](https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-phosphor/nuvoton-layer/recipes-connectivity/jsnbd)
-
-**How to use**
-
-1. Clone a physical usb drive to an image file
-    * For Linux - use tool like **dd**
-      ```
-      dd if=/dev/sda of=usb.img bs=1M count=100
-      ```
-      > _**bs** here is block size and **count** is block count._
-      >
-      > _For example, if the size of your usb drive is 1GB, then you could set "bs=1M" and "count=1024"_
-
-    * For Windows - use tool like **Win32DiskImager.exe**
-
-    > _NOTICE : A simple *.iso file cannot work for this._
-
-2. Login and switch to webpage of VM on your browser
-    ```
-    https://XXX.XXX.XXX.XXX/#/server-control/virtual-media
-    ```
-
-3. Operations of Virtual Media
-    * After `Choose File`, click `Start` to start VM network service
-    * After clicking `Start`, you will see a new usb device on HOST OS
-    * If you want to stop this service, just click `Stop` to stop VM network service.
-
-**Maintainer**
-* Medad CChien
 
 ## Features In Progressing
 * Improve IPMI
@@ -1486,9 +1568,9 @@ Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Bloc
 Type          | Size    | Note                                                                                                     |
 :-------------|:------- |:-------------------------------------------------------------------------------------------------------- |
 image-uboot   |  450 KB | u-boot 2019.01 + bootblock for Poleg only                                                                       |
-image-kernel  |  3.9 MB   | linux 5.2.11 version                                                                                       |
-image-rofs    |  16.9 MB  | bottom layer of the overlayfs, read only                                                                 |
-image-rwfs    |  0 MB  | middle layer of the overlayfs, rw files in this partition will be created at runtime,<br /> with a maximum capacity of 2MB|
+image-kernel  |  4.0 MB   | linux 5.2.11 version                                                                                       |
+image-rofs    |  18.0 MB  | bottom layer of the overlayfs, read only                                                                 |
+image-rwfs    |  0 MB  | middle layer of the overlayfs, rw files in this partition will be created at runtime,<br /> with a maximum capacity of 3 MB|
 
 # Modifications
 
@@ -1499,4 +1581,4 @@ image-rwfs    |  0 MB  | middle layer of the overlayfs, rw files in this partiti
 * 2019.12.11 Update Time settings of System/Time
 * 2019.12.13 Update Sensors, and LED
 * 2019.12.13 Update Fan, BIOS POST code, and FRU
-* 2019.12.17 update SOL IPMI
+* 2019.12.17 update SOL IPMI, Image size, and server power operations
