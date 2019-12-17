@@ -14,7 +14,7 @@ This layer depends on:
 
 ```
   URI: git@github.com:Nuvoton-Israel/openbmc
-  branch: master
+  branch: runbmc
 ```
 
 # Contacts for Patches
@@ -47,6 +47,8 @@ Please submit any patches against the meta-runbmc-nuvoton layer to the maintaine
     + [FAN](#fan)
     + [BIOS POST Code](#bios-post-code)
     + [FRU](#fru)
+  * [IPMI / DCMI](#ipmi--dcmi)
+    + [SOL IPMI](#sol-ipmi)
   * [LDAP for User Management](#ldap-for-user-management)
     + [LDAP Server Setup](#ldap-server-setup)
   * [JTAG Master](#jtag-master)
@@ -700,6 +702,54 @@ This is a patch for enabling FRU feature in [phosphor-impi-fru](https://github.c
 
 **Maintainer**
 * Tim Lee
+
+## IPMI / DCMI
+
+### SOL IPMI
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/4ce3198/openbmc/sol_ipmi_win10.PNG">
+
+The Serial over LAN (SoL) via IPMI redirects the output of the server’s serial port to a command/terminal window on your workstation.
+
+The user uses the ipmi tool like [ipmiutil](http://ipmiutil.sourceforge.net/) to interact with SOL via IPMI. Here the [ipmiutil](http://ipmiutil.sourceforge.net/) is used as an example.
+
+The patch integrates [phosphor-net-ipmid](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/ipmi/phosphor-ipmi-net_%25.bbappend) into Nuvoton's NPCM750 solution for OpenBMC.
+
+**Source URL**
+
+* [https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/ipmi/phosphor-ipmi-net_%25.bbappend](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/ipmi/phosphor-ipmi-net_%25.bbappend)
+
+**How to use**
+
+1. Download the [ipmiutil](http://ipmiutil.sourceforge.net/) according to the host OS in your workstation.
+
+   > _Here it's assumed that the host OS is Windows 10 and ipmiutil for Windows is downloaded and used accordingly._
+
+2. Run SOL:
+
+    * Extract or install the ipmiutil package to a folder in your workstation in advance.
+    * Launch a command window and navigate to that folder.
+    * Input the following command in the command window.
+      ```
+      ipmiutil sol -N 192.168.0.2 -U root -P 0penBmc -J 3 -V 4 -a
+      ```
+    * (Optional) Configure the `Properties` of the command window to see the entire output of SOL.
+      > _Screen Buffer Size Width: 200_
+        _Screen Buffer Size Height: 400_
+        _Window Size Width: 100_
+        _Window Size Height: 40_
+
+4. End SOL session:
+
+    * Press the "~" key (using the shift key + "`" key) and "." key at the same time in the command window.
+    * Input the following command in the command window.
+      ```
+      ipmiutil sol -N 192.168.0.2 -U root -P 0penBmc -J 3 -V 4 -d
+      ```
+
+**Maintainer**
+
+* Tyrone Ting
+* Stanley Chu
 
 
 # LDAP for User Management
@@ -1449,3 +1499,4 @@ image-rwfs    |  0 MB  | middle layer of the overlayfs, rw files in this partiti
 * 2019.12.11 Update Time settings of System/Time
 * 2019.12.13 Update Sensors, and LED
 * 2019.12.13 Update Fan, BIOS POST code, and FRU
+* 2019.12.17 update SOL IPMI
