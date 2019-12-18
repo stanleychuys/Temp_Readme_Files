@@ -181,6 +181,7 @@ Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Bloc
 **Source URL**
 
 * [https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-phosphor/nuvoton-layer/recipes-connectivity/jsnbd](https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-phosphor/nuvoton-layer/recipes-connectivity/jsnbd)
+* [https://github.com/Nuvoton-Israel/openbmc-util/tree/master/virtual_media_openbmc2.6](https://github.com/Nuvoton-Israel/openbmc-util/tree/master/virtual_media_openbmc2.6)
 
 **How to use**
 
@@ -206,6 +207,19 @@ Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Bloc
     * After `Choose File`, click `Start` to start VM network service
     * After clicking `Start`, you will see a new usb device on HOST OS
     * If you want to stop this service, just click `Stop` to stop VM network service.
+
+4. VM standalone application
+    * Download [application source code](https://github.com/Nuvoton-Israel/openbmc-util/tree/master/virtual_media_openbmc2.6)
+    * Follow readme instuctions install QT and Openssl
+    * Start QT creator, open project **VirtualMedia.pro**, then build all
+    * Launch windows/linux application
+        > _NOTICE : use `sudo` to launch app in linux and install `nmap` first_
+    *  Operations
+        + After `Chose an Image File` or `Select an USB Drive`, click `Search` to check which BMCs are on line
+        + Select any on line BMC and key in `Account/Password` and click `Start VM` to start VM network service (still not hook USB disk to host platform)
+        + After `Start VM`, click `Mount USB` to hook the emulated usb disk to host platform, or click `Stop VM` to stop VM network service.
+        + After `Mount USB`, click `UnMount USB` to emulate unplugging the usb disk from host platform
+        + After `UnMount USB`, click `Stop VM` to stop VM network service, or click `Mount USB` to hook USB disk to host platform.
 
 **Maintainer**
 * Medad CChien
@@ -1660,4 +1674,4 @@ image-rwfs    |  0 MB  | middle layer of the overlayfs, rw files in this partiti
 * 2019.12.13 Update Sensors, and LED
 * 2019.12.13 Update Fan, BIOS POST code, and FRU
 * 2019.12.17 Update SOL IPMI, Image size, and server power operations
-* 2019.12.18 Update Message Bridging
+* 2019.12.18 Update Message Bridging, and VM application
