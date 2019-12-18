@@ -50,6 +50,7 @@ Please submit any patches against the meta-runbmc-nuvoton layer to the maintaine
     + [FRU](#fru)
   * [IPMI / DCMI](#ipmi--dcmi)
     + [SOL IPMI](#sol-ipmi)
+    + [Message Bridging](#message-bridging)
   * [LDAP for User Management](#ldap-for-user-management)
     + [LDAP Server Setup](#ldap-server-setup)
   * [JTAG Master](#jtag-master)
@@ -254,7 +255,7 @@ This is a secure flash update mechanism to update BMC firmware via WebUI.
 **Source URL**
 
 * [https://github.com/Nuvoton-Israel/phosphor-bmc-code-mgmt](https://github.com/Nuvoton-Israel/phosphor-bmc-code-mgmt)
-* [commit](https://github.com/Nuvoton-Israel/phosphor-bmc-code-mgmt/commit/e7264acd23663320e50064d6dabeaebfa08bfdec)
+* [https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-phosphor/nuvoton-layer/recipes-phosphor/ipmi/phosphor-ipmi-flash_%25.bbappend](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-phosphor/nuvoton-layer/recipes-phosphor/ipmi/phosphor-ipmi-flash_%25.bbappend)
 
 **How to use**
 
@@ -336,7 +337,7 @@ Server Power Operations are using to Power on/Warm reboot/Cold reboot/Orderly sh
 
 **How to use**
 
-2. Configure reaction of power button on generic host OS
+1. Configure reaction of power button on generic host OS
     * When host OS is running **Linux** and you press **PWRON** header on motherboard, you're prompted with a list of options - this is the **interactive** shutdown. The OS will go **Orderly shutdown** for a while if you didn't select any action from it. If you don't want this interactive shutdown pop up and hope OS go **Orderly shutdown** directly, you can enter below command in terminal before testing:
       ```
       gsettings set org.gnome.settings-daemon.plugins.power button-power 'shutdown'
@@ -347,7 +348,7 @@ Server Power Operations are using to Power on/Warm reboot/Cold reboot/Orderly sh
 
       There is a package **phosphor-watchdog** included in OpenBMC now. The watchdog daemon is started on host's power on, which is used to monitor if host is alive. In normal case, when host starts, it will send IPMI commands to kick watchdog and so everything would work fine. If host fails to start, the watchdog eventually timeout. However, the default watchdog timeout action is **HardReset** which is defined at [Watchdog.interface.yaml](https://github.com/openbmc/phosphor-dbus-interfaces/blob/master/xyz/openbmc_project/State/Watchdog.interface.yaml) in **phosphor-dbus-interfaces** that will cause host rebooted after power on.
 
-3. Configure GPIO pin definitions for **POWER_SW**, **RESET_SW** and **PGOOD** on BMC
+2. Configure GPIO pin definitions for **POWER_SW**, **RESET_SW** and **PGOOD** on BMC
 
     * Pin **POWER_SW** (GPIO505) is use to do all server power operations, pin **RESET_SW** (GPIO504) is reserve for reset operations, and **PGOOD** (GPIO506) is use to monitor DC real status that indicate `Server power` in WebUI.
 
@@ -377,27 +378,27 @@ Server Power Operations are using to Power on/Warm reboot/Cold reboot/Orderly sh
       ```
       > _"name" here is referred in code and fixed, please don't modify it. "num"  means GPIO pin number and changeable here, "direction" should be set as "in" for **PGOOD**, "out" for **RESET_UP_PIN** and **POWER_UP_PIN**, and "polarity" should be set as "false" then set as "true" for **POWER_UP_PIN** accordind NPCM750 schematic._
 
-4. Server Power on
+3. Server Power on
     * Press `Power on` button from `Server control` ->`Server power operations` of WebUI.
 
       > _[obmc-host-start@.target](https://github.com/openbmc/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-host-start%40.target) is the one driving the boot of the system._
 
-5. Server Power off (Soft)
+4. Server Power off (Soft)
     * Press `Orderly shutdown` button from `Server control` ->`Server power operations` of WebUI.
 
       > _The soft server power off function is encapsulated in the [obmc-host-shutdown@.target](https://github.com/openbmc/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-host-shutdown%40.target) that is soft in that it notifies the host of the power off request and gives it a certain amount of time to shut itself down._
 
-6. Server Power off (Hard)
+5. Server Power off (Hard)
     * Press `Immediate shutdown` button from `Server control` ->`Server power operations` of WebUI.
 
       > _The hard server power off is encapsulated in the [obmc-chassis-hard-poweroff@.target](https://github.com/openbmc/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-chassis-hard-poweroff%40.target) that will force the stopping of the soft power off service if running, and immediately cut power to the system._
 
-7. Server Reboot (Warm)
+6. Server Reboot (Warm)
     * Press `Warm reboot` button from `Server control` ->`Server power operations` of WebUI.
 
       > _The warm reboot of the server is encapsulated in the [obmc-host-reboot@.target](https://github.com/openbmc/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-host-reboot%40.target) that will utilize the server power off (soft) target [obmc-host-shutdown@.target](https://github.com/openbmc/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-host-shutdown%40.target) and then, once that completes, start the host power on target [obmc-host-start@.target](https://github.com/openbmc/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-host-start%40.target)._
 
-8. Server Reboot (Cold)
+7. Server Reboot (Cold)
     * Press `Cold reboot` button from `Server control` ->`Server power operations` of WebUI.
 
       > _The cold reboot of the server is shutdown server immediately, then restarts it. This target will utilize the Immediate shutdown target [obmc-chassis-hard-poweroff@.target](https://github.com/openbmc/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-chassis-hard-poweroff%40.target) and then, start the host power on target [obmc-host-start@.target](https://github.com/openbmc/openbmc/blob/master/meta-phosphor/recipes-core/systemd/obmc-targets/obmc-host-start%40.target)._
@@ -862,6 +863,83 @@ The patch integrates [phosphor-net-ipmid](https://github.com/Nuvoton-Israel/open
     * Input the following command in the command window.
       ```
       ipmiutil sol -N 192.168.0.2 -U root -P 0penBmc -J 3 -V 4 -d
+      ```
+
+**Maintainer**
+
+* Tyrone Ting
+* Stanley Chu
+
+### Message Bridging
+
+BMC Message Bridging provides a mechanism for routing IPMI Messages between different media.
+
+Please refer to [IPMI Website](https://www.intel.com/content/www/us/en/products/docs/servers/ipmi/ipmi-home.html) for details about Message Bridging.
+
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/dfdfd04/openbmc/message_bridge.png">
+
+IPMI daemon would set or get D-Bus property to/from path like: _/xyz/openbmc_project/control/host0/power_cap_ when get DCMI command from IPMI tool via network or LPC.
+[Phosphor-node-manager-proxy](https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/ipmi/phosphor-node-manager-proxy) will handle the property change and present the property value.
+Once the **phosphor-node-manager-proxy** property changed, it will prepare IPMB package data and call D-Bus method "sendRequest" to D-Bus path: _/xyz/openbmc_project/Ipmi/Channel/Ipmb_.
+Finally, IPMB gets the request and constructs I2C command from the request, then sends the I2C command to ME(Intel Management Engine) for getting information which controlled by ME.
+
+The patch integrates the [ipmid](https://github.com/openbmc/phosphor-host-ipmid), [phosphor-node-manager-proxy](https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/ipmi/phosphor-node-manager-proxy) and [ipmbbridge](https://github.com/openbmc/ipmbbridge) projects.
+
+
+**Source URL**
+
+* [https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/ipmi](https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/ipmi)
+
+**How to use**
+
+1. Configure [ipmb-channel.json](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/ipmi/phosphor-ipmi-ipmb/ipmb-olympus-channels.json) as below sample. Check schematic to fill up BMC and ME I2C address, and each sys path.
+    ```
+    "channels": [
+      {
+        "type": "me",
+        "master-path": "/dev/i2c-5",
+        "slave-path": "/sys/bus/i2c/devices/5-1010/slave-mqueue",
+        "bmc-addr": 32,
+        "remote-addr": 44
+      }
+    ]
+    ```
+
+2. Deploy **phosphor-node-manager-proxy** from Intel-BMC project [node-manager](https://github.com/Intel-BMC/node-manager), because the project still not merge in OpenBMC project. And modify the interface define if need. The patch [0001-change-the-value-number-from-int64-to-double.patch](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/ipmi/phosphor-node-manager-proxy/0001-change-the-value-number-from-int64-to-double.patch) for node manager is change the property type that make bmcweb can get the sensor value on web UI.
+
+3. Install the ipmitool in host OS, here using Ubuntu 18.04 as example.
+
+    * Using apt command install ipmitool.
+      ```
+      sudo apt install ipmitool
+      ```
+
+4. Test message bridging.
+
+    * Send DCMI commnad via LPC
+      ```
+      sudo ipmitool dcmi get_mc_id_string
+      ```
+
+      This command would return result as below:
+
+      ```
+        Get Management Controller Indentifier String: olympus-nuvoton
+      ```
+
+    * Send DCMI command via network
+      ```
+      sudo ipmitool -I lanplus -H 10.103.152.12 -U root -P 0penBmc dcmi power get_limit
+      ```
+
+      The result will show like below if everything is OK.
+
+      ```
+      Current Limit State: Power Limit Active
+      Exception actions:   Hard Power Off & Log Event to SEL
+      Power Limit:         500 Watts
+      Correction time:     0 milliseconds
+      Sampling period:     0 seconds
       ```
 
 **Maintainer**
@@ -1340,7 +1418,7 @@ sudo ./burn_my_bmc --command update --interface ipmipci --image image-bmc --sig 
 This is an OpenBMC IPMI Library (Handler) for In-Band Firmware Update.
 
 **How to use**
-1.You need to enable the way you want to transfer data from host to bmc
+1. You need to enable the way you want to transfer data from host to bmc
 
 ```
 nuvoton-lpc
@@ -1363,7 +1441,7 @@ enable-nuvoton-p2a-vga
 ## Features In Progressing
 * Improve IPMI
 * Improve Redfish
-* Sytem logs
+* System logs
 
 ## Features Planned
 * PLDM
@@ -1581,4 +1659,5 @@ image-rwfs    |  0 MB  | middle layer of the overlayfs, rw files in this partiti
 * 2019.12.11 Update Time settings of System/Time
 * 2019.12.13 Update Sensors, and LED
 * 2019.12.13 Update Fan, BIOS POST code, and FRU
-* 2019.12.17 update SOL IPMI, Image size, and server power operations
+* 2019.12.17 Update SOL IPMI, Image size, and server power operations
+* 2019.12.18 Update Message Bridging
