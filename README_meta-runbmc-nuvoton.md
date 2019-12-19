@@ -45,12 +45,12 @@ Please submit any patches against the meta-runbmc-nuvoton layer to the maintaine
     + [Time](#time)
     + [Sensor](#sensor)
     + [LED](#led)
-    + [FAN](#fan)
     + [BIOS POST Code](#bios-post-code)
     + [FRU](#fru)
+    + [Fan PID Control](#fan-pid-control)
   * [IPMI / DCMI](#ipmi--dcmi)
     + [SOL IPMI](#sol-ipmi)
-    + [Message Bridging](#message-bridging)
+    + [Host Power Budget Control](#host-power-budget-control)
   * [LDAP for User Management](#ldap-for-user-management)
     + [LDAP Server Setup](#ldap-server-setup)
   * [JTAG Master](#jtag-master)
@@ -210,7 +210,7 @@ Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Bloc
 
 4. VM standalone application
     * Download [application source code](https://github.com/Nuvoton-Israel/openbmc-util/tree/master/virtual_media_openbmc2.6)
-    * Follow readme instuctions install QT and Openssl
+    * Follow [readme](https://github.com/Nuvoton-Israel/openbmc-util/blob/master/virtual_media_openbmc2.6/NBDServerWSWindows/README) instuctions install QT and Openssl
     * Start QT creator, open project **VirtualMedia.pro**, then build all
     * Launch windows/linux application
         > _NOTICE : use `sudo` to launch app in linux and install `nmap` first_
@@ -704,37 +704,6 @@ Turning on ServerLED via WebUI will make **identify** leds on BMC start blinking
 
 * Stanley Chu
 
-### FAN
-In NPCM750, we support four FAN slots and FAN RPMS will dynamic adjustment according temperature variation.
-
-**Source URL**
-
-Default Web-UI only show one Fan Tach Fan1, and NPCM750 support four Fan Tach. Thus, we modify this file to support four Fan Tach.
-* [https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/sensors/phosphor-hwmon/obmc/hwmon/ahb/apb/pwm-fan-controller%40103000.conf](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/sensors/phosphor-hwmon/obmc/hwmon/ahb/apb/pwm-fan-controller%40103000.conf)
-
-**How to use**
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/5745760/openbmc/fan.png">
-
-* Monitor FAN RPMS by **Web-UI** `Server health`
-  ->`Sensors`
-* Enable FAN dynamic adjustment with temperature variation by command
-  ```
-  systemctl start obmc-chassis-poweron@0.target
-  ```
-
-  This command will trigger systemd to execute chassis poweron target this unit. And you can use the following command to slmulate FAN control function.
-* Test FAN RPMS by command
-  ```
-  echo 25 > /sys/class/hwmon/hwmon2/pwm1
-  echo 50 > /sys/class/hwmon/hwmon2/pwm2
-  echo 100 > /sys/class/hwmon/hwmon2/pwm3
-  echo 255 > /sys/class/hwmon/hwmon2/pwm6
-  ```
-  We can set pwm value (0-255) for pwm1-3, and 6 to control FAN1-4 RPMS value by echo command and the result will show on Web-UI
-
-**Maintainer**
-* Tim Lee
-
 
 ### BIOS POST Code
 In Poleg, we support a FIFO for monitoring BIOS POST Code. Typically, this feature is used by the BMC to "watch" host boot progress via port 0x80 writes made by the BIOS during the boot process.
@@ -745,24 +714,24 @@ This is a patch for enabling BIOS POST Code feature in [phosphor-host-postd](htt
 
 * [https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/host/phosphor-host-postd_%25.bbappend](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/host/phosphor-host-postd_%25.bbappend)
 
-    **How to use**
+**How to use**
 
-    * Execute BIOS POST Code test program by command in BMC
-      ```
-      snooper
-      ```
+* Execute BIOS POST Code test program by command in BMC
+  ```
+  snooper
+  ```
 
-      This command will trigger snooper test program to record BIOS POST Code from port 0x80 of host and save to file with timestamp filename in Poleg for each host power on or reset.
-      > _Saved filename format example: 2019_4_30_11_52_35_ON_
+  This command will trigger snooper test program to record BIOS POST Code from port 0x80 of host and save to file with timestamp filename in Poleg for each host power on or reset.
+  > _Saved filename format example: 2019_4_30_11_52_35_ON_
 
-    * Server Power on
+* Server Power on
 
-      Press `Power on` button from `Server control` ->`Server power operations` of WebUI.
-      During server power on, snooper test program will print received BIOS POST Code on screen and record to file in Poleg at the same time.
-      > _Snooper test program print received BIOS POST Code example:_
-        > _recv: 0x3
-           recv: 0x2
-           recv: 0x7_
+  Press `Power on` button from `Server control` ->`Server power operations` of WebUI.
+  During server power on, snooper test program will print received BIOS POST Code on screen and record to file in Poleg at the same time.
+  > _Snooper test program print received BIOS POST Code example:_
+    > _recv: 0x3
+        recv: 0x2
+        recv: 0x7_
 
 **Maintainer**
 * Tim Lee
@@ -836,6 +805,121 @@ This is a patch for enabling FRU feature in [phosphor-impi-fru](https://github.c
 **Maintainer**
 * Tim Lee
 
+### Fan PID Control
+In NPCM750, we have two PWM modules and support eight PWM signals to control fans for dynamic adjustment according temperature variation.
+
+**Source URL**
+
+* [https://github.com/openbmc/phosphor-pid-control](https://github.com/openbmc/phosphor-pid-control)
+* [https://github.com/openbmc/phosphor-hwmon](https://github.com/openbmc/phosphor-hwmon)
+* [https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/fans/phosphor-pid-control](https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/fans/phosphor-pid-control)
+
+**How to use**
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/8814c64/openbmc/phosphor-pid.png">
+
+* This is a Margin-based daemon running within the OpenBMC environment. It uses a well-defined [configuration file](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/fans/phosphor-pid-control/config-olympus-nuvoton.json) to control the temperature of the tray components to keep them within operating conditions.
+
+    How to configure the configuration file?
+    + Zone Specification. A configuration file will need to exist for each board
+    + Each zone must have at least one fan that it exclusively controls. Each zone must have at least one temperature sensor, but they may be shared.
+    + Each zone must have at least one fan that it exclusively controls. Each zone must have at least one temperature sensor, but they may be shared.
+    + **sensors** is a list of the sensor dictionaries, whereas **zones** is a list of zones.
+
+    The following sample configuraion shows how to using one PWM control more than one fans on system.
+    ```
+    "sensors" : [
+        {
+            "name": "fan1",
+            "type": "fan",
+            "readPath": "/xyz/openbmc_project/sensors/fan_tach/fan1",
+            "writePath": "/sys/devices/platform/ahb/ahb:apb/f0103000.pwm-fan-controller/hwmon/**/pwm1",
+            "min": 0,
+            "max": 255
+        },
+        {
+            "name": "fan2",
+            "type": "fan",
+            "readPath": "/xyz/openbmc_project/sensors/fan_tach/fan2",
+            "writePath": "/sys/devices/platform/ahb/ahb:apb/f0103000.pwm-fan-controller/hwmon/**/pwm1",
+            "min": 0,
+            "max": 255
+        },
+        {
+            "name": "Core_0_CPU0",
+            "type": "temp",
+            "readPath": "/xyz/openbmc_project/sensors/temperature/Core_0_CPU0",
+            "writePath": "",
+            "min": 0,
+            "max": 0,
+            "timeout": 0
+        },
+    ],
+    "zones" : [
+        {
+            "id": 0,
+            "minThermalOutput": 0.0,
+            "failsafePercent": 100.0,
+            "pids": [
+                {
+                    "name": "fan1",
+                    "type": "fan",
+                    "inputs": ["fan1"],
+                    "setpoint": 40.0,
+                    "pid": {
+                        "samplePeriod": 1.0,
+                        "proportionalCoeff": 0.0,
+                        "integralCoeff": 0.0,
+                        "feedFwdOffsetCoeff": 0.0,
+                        "feedFwdGainCoeff": 1.0,
+                        "integralLimit_min": 0.0,
+                        "integralLimit_max": 0.0,
+                        "outLim_min": 3.0,
+                        "outLim_max": 100.0,
+                        "slewNeg": 0.0,
+                        "slewPos": 0.0
+                    }
+                },
+                {
+                    "name": "Core_0_CPU0",
+                    "type": "stepwise",
+                    "inputs": ["Core_0_CPU0"],
+                    "setpoint": 30.0,
+                    "pid": {
+                        "samplePeriod": 1.0,
+                        "positiveHysteresis": 0.0,
+                        "negativeHysteresis": 0.0,
+                        "isCeiling": false,
+                        "reading": {
+                          ...
+                        }
+                    },
+                },
+            ],
+        },
+    ]
+    ```
+    The [PID README](https://github.com/openbmc/phosphor-pid-control/blob/master/configure.md) provide more detail about the meaning for each parameter. The most important here is the settings of readPath and writePath.
+    Sensors must only set readPath, and fill up empty string to writePath.
+    Fans should set the D-Bus path to readPath, also set the pwm system path to writePath.
+
+
+* OpenBMC will run swampd(PID control daemon) through [phosphor-pid-control.service](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/fans/phosphor-pid-control/phosphor-pid-control.service) that controls the fans by pre-defined zones.
+    ```
+    [Service]
+    Type=simple
+    ExecStart=/usr/bin/swampd
+    Restart=always
+    RestartSec=5
+    StartLimitInterval=0
+    ExecStopPost=/usr/bin/fan-default-speed.sh
+    ```
+    + **ExecStopPost** that means an additional commands that are executed after the service is stopped.
+
+
+**Maintainer**
+* Tim Lee
+
+
 ## IPMI / DCMI
 
 ### SOL IPMI
@@ -884,9 +968,9 @@ The patch integrates [phosphor-net-ipmid](https://github.com/Nuvoton-Israel/open
 * Tyrone Ting
 * Stanley Chu
 
-### Message Bridging
+### Host Power Budget Control
 
-BMC Message Bridging provides a mechanism for routing IPMI Messages between different media.
+Host Power Budget Control provides a mechanism for implement IPMI DCMI messages by using D-Bus and IPMB.
 
 Please refer to [IPMI Website](https://www.intel.com/content/www/us/en/products/docs/servers/ipmi/ipmi-home.html) for details about Message Bridging.
 
@@ -1675,3 +1759,5 @@ image-rwfs    |  0 MB  | middle layer of the overlayfs, rw files in this partiti
 * 2019.12.13 Update Fan, BIOS POST code, and FRU
 * 2019.12.17 Update SOL IPMI, Image size, and server power operations
 * 2019.12.18 Update Message Bridging, and VM application
+* 2019.12.19 Rename Message Bridging to Host Power Budget Control
+* 2019.12.19 Add Fan PID control
