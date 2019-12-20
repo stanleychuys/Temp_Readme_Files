@@ -174,7 +174,7 @@ It's verified with Nuvoton's NPCM750 Olympus solution and Quanta RunBMC.
 * Tyrone Ting
 
 ### Virtual Media
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/3bf2693/openbmc/vm.png">
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/cab7306/openbmc/vm.png">
 
 Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Block Device(NBD) and Mass Storage(MSTG).
 
@@ -225,7 +225,7 @@ Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Bloc
 * Medad CChien
 
 ### BMC Firmware Update
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/0f22742/openbmc/firmware-update.png">
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/cab7306/openbmc/firmware-update.png">
 
 This is a secure flash update mechanism to update BMC firmware via WebUI.
 
@@ -737,7 +737,7 @@ This is a patch for enabling BIOS POST Code feature in [phosphor-host-postd](htt
 * Tim Lee
 
 ### FRU
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/d95b6d0/openbmc/fru.png">
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/cab7306/openbmc/fru.png">
 
 Field Replaceable Unit. The FRU Information is used to primarily to provide “inventory” information about the boards that the FRU Information Device is located on. In NPCM750, we connect EEPROM component as FRU Information Device to support this feature. Typically, this feature is used by the BMC to "monitor" host server health about H/W copmonents status.
 
