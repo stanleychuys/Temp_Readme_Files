@@ -35,7 +35,7 @@ Please submit any patches against the meta-runbmc-nuvoton layer to the maintaine
 - [Contacts for Patches](#contacts-for-patches)
 - [Features of NPCM750 RunBMC Olympus](#features-of-npcm750-runbmc-olympus)
   * [WebUI](#webui)
-    + [Remote KVM](#remote-kvm)
+    + [iKVM](#ikvm)
     + [Serial Over Lan](#serial-over-lan)
     + [Virtual Media](#virtual-media)
     + [BMC Firmware Update](#bmc-firmware-update)
@@ -71,7 +71,7 @@ Please submit any patches against the meta-runbmc-nuvoton layer to the maintaine
 
 ## WebUI
 
-### Remote KVM
+### iKVM
 <img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/master/openbmc/ipkvm.PNG">
 
 This is a Virtual Network Computing (VNC) server programm using [LibVNCServer](https://github.com/LibVNC/libvncserver).
@@ -341,7 +341,7 @@ This is a secure flash update mechanism to update BMC firmware via WebUI.
 * Brian Ma
 
 ### Server Power Operations
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/1adf1a3/openbmc/pwoer_ops.png">
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/8fc19a1/openbmc/power_ops.png">
 
 Server Power Operations are using to Power on/Warm reboot/Cold reboot/Orderly shutdown/Immediate shutdown remote host PC.
 
@@ -706,7 +706,7 @@ Turning on ServerLED via WebUI will make **identify** leds on BMC start blinking
 
 
 ### BIOS POST Code
-In Poleg, we support a FIFO for monitoring BIOS POST Code. Typically, this feature is used by the BMC to "watch" host boot progress via port 0x80 writes made by the BIOS during the boot process.
+In NPCM750, we support a FIFO for monitoring BIOS POST Code. Typically, this feature is used by the BMC to "watch" host boot progress via port 0x80 writes made by the BIOS during the boot process.
 
 **Source URL**
 
@@ -721,13 +721,13 @@ This is a patch for enabling BIOS POST Code feature in [phosphor-host-postd](htt
   snooper
   ```
 
-  This command will trigger snooper test program to record BIOS POST Code from port 0x80 of host and save to file with timestamp filename in Poleg for each host power on or reset.
+  This command will trigger snooper test program to record BIOS POST Code from port 0x80 of host and save to file with timestamp filename in BMC for each host power on or reset.
   > _Saved filename format example: 2019_4_30_11_52_35_ON_
 
 * Server Power on
 
   Press `Power on` button from `Server control` ->`Server power operations` of WebUI.
-  During server power on, snooper test program will print received BIOS POST Code on screen and record to file in Poleg at the same time.
+  During server power on, snooper test program will print received BIOS POST Code on screen and record to file in BMC at the same time.
   > _Snooper test program print received BIOS POST Code example:_
     > _recv: 0x3
         recv: 0x2
@@ -739,7 +739,7 @@ This is a patch for enabling BIOS POST Code feature in [phosphor-host-postd](htt
 ### FRU
 <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/d95b6d0/openbmc/fru.png">
 
-Field Replaceable Unit. The FRU Information is used to primarily to provide “inventory” information about the boards that the FRU Information Device is located on. In Poleg, we connect EEPROM component as FRU Information Device to support this feature. Typically, this feature is used by the BMC to "monitor" host server health about H/W copmonents status.
+Field Replaceable Unit. The FRU Information is used to primarily to provide “inventory” information about the boards that the FRU Information Device is located on. In NPCM750, we connect EEPROM component as FRU Information Device to support this feature. Typically, this feature is used by the BMC to "monitor" host server health about H/W copmonents status.
 
 **Source URL**
 
@@ -815,17 +815,13 @@ In NPCM750, we have two PWM modules and support eight PWM signals to control fan
 * [https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/fans/phosphor-pid-control](https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/fans/phosphor-pid-control)
 
 **How to use**
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/8814c64/openbmc/phosphor-pid.png">
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/8fc19a1/openbmc/fan_rpms.png">
 
-* This is a Margin-based daemon running within the OpenBMC environment. It uses a well-defined [configuration file](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/fans/phosphor-pid-control/config-olympus-nuvoton.json) to control the temperature of the tray components to keep them within operating conditions.
+In order to automatically apply accurate and responsive correction to a fan control function, we use the swampd to handle output PWM signal. For enable this daemon, basically we need configuring the swampd configuration file and add a system service for start this daemon as below steps.
 
-    How to configure the configuration file?
-    + Zone Specification. A configuration file will need to exist for each board
-    + Each zone must have at least one fan that it exclusively controls. Each zone must have at least one temperature sensor, but they may be shared.
-    + Each zone must have at least one fan that it exclusively controls. Each zone must have at least one temperature sensor, but they may be shared.
-    + **sensors** is a list of the sensor dictionaries, whereas **zones** is a list of zones.
+* The swampd(PID control daemon) is a Margin-based daemon running within the OpenBMC environment. It uses a well-defined [configuration file](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/fans/phosphor-pid-control/config-olympus-nuvoton.json) to control the temperature of the tray components to keep them within operating conditions.
 
-    The following sample configuraion shows how to using one PWM control more than one fans on system.
+    Here is a configuraion example shows how to using one PWM control more than one fans on system.
     ```
     "sensors" : [
         {
@@ -903,7 +899,7 @@ In NPCM750, we have two PWM modules and support eight PWM signals to control fan
     Fans should set the D-Bus path to readPath, also set the pwm system path to writePath.
 
 
-* OpenBMC will run swampd(PID control daemon) through [phosphor-pid-control.service](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/fans/phosphor-pid-control/phosphor-pid-control.service) that controls the fans by pre-defined zones.
+* OpenBMC will run swampd through [phosphor-pid-control.service](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/fans/phosphor-pid-control/phosphor-pid-control.service) that controls the fans by pre-defined zones. Here is a example service.
     ```
     [Service]
     Type=simple
@@ -1065,7 +1061,7 @@ A common use of LDAP is to provide a central place to store usernames and passwo
 
 **How to use**
 
-1. The user is expected to know how to follow the instructions in the section **Setting up your OpenBMC project** in [Nuvoton-Israel/openbmc](https://github.com/Nuvoton-Israel/openbmc) to build and program an OpenBMC image into Poleg platforms (The term **Poleg** is used hereafter). 
+1. The user is expected to know how to follow the instructions in the section **Setting up your OpenBMC project** in [Nuvoton-Israel/openbmc](https://github.com/Nuvoton-Israel/openbmc) to build and program an OpenBMC image into NPCM750 platforms.
     > _Prepare a PC which builds OpenBMC. (called the build machine hereafter)_  
     > _The user is also expected to have knowledge of LDAP and its operations._
 
@@ -1180,7 +1176,7 @@ A common use of LDAP is to provide a central place to store usernames and passwo
       sudo /usr/local/libexec/slapd -d 1 -h 'ldaps:/// ldap:/// ldapi:///'
       ```
 
-4. Setup LDAP client configuration on Poleg.
+4. Setup LDAP client configuration on BMC.
 
     * Open a terminal in the build machine and navigate to the directory which contains OpenBMC source codes. The directory is called **OPENBMCDIR** hereafter.
       + Copy all directories and their containing files from [https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-phosphor/nuvoton-layer/dlc/ldap-support-user-management](https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-phosphor/nuvoton-layer/dlc/ldap-support-user-management) under OPENBMCDIR/meta-quanta/meta-runbmc-nuvoton directory according to their default hierarchy.
@@ -1190,8 +1186,8 @@ A common use of LDAP is to provide a central place to store usernames and passwo
       + The IP address for the LDAP server in Ubuntu is configured as **10.103.152.11**. Modify the field **uri ldap** in nslcd.conf according to your network configuration.
         > _uri ldap://10.103.152.11/_
 
-      + The modification above is done in OpenBmc build time. If you would like to modify **uri** in OpenBmc run time, follow the instructions below after logging into Poleg in the console program (like Tera Term) with the root account (root/0penBmc).
-        > _The console program is used to display a debug console provided by Poleg._
+      + The modification above is done in OpenBmc build time. If you would like to modify **uri** in OpenBmc run time, follow the instructions below after logging into BMC in the console program (like Tera Term) with the root account (root/0penBmc).
+        > _The console program is used to display a debug console provided by BMC._
 
         ```
         vi /etc/nslcd.conf
@@ -1214,22 +1210,22 @@ A common use of LDAP is to provide a central place to store usernames and passwo
       bitbake -C fetch openldap
       bitbake obmc-phosphor-image
       ```
-    * Program the updated image into Poleg.
+    * Program the updated image into BMC.
 
 5. Test LDAP server.
 
-    * Connect Poleg to the PC running Ubuntu with an ethernet cable and power on it.
-    * Log in Poleg from the console program (like Tera Term) with the root account (root/0penBmc).
-      > _The console program is used to display a debug console provided by Poleg._
+    * Connect BMC to the PC running Ubuntu with an ethernet cable and power on it.
+    * Log in BMC from the console program (like Tera Term) with the root account (root/0penBmc).
+      > _The console program is used to display a debug console provided by BMC._
 
     * The IP address for the LDAP server is 192.168.0.101 for now.
-    * Set up IP addresses for Poleg and Ubuntu so that they can ping each other.
-      + For example, set Poleg's IP address to 192.168.0.2. Input the following command in the console program.
+    * Set up IP addresses for BMC and Ubuntu so that they can ping each other.
+      + For example, set BMC's IP address to 192.168.0.2. Input the following command in the console program.
         ```
         ifconfig eth2 192.168.0.2
         ```
 
-        > _Please replace **192.168.0.2** with your IP configuration for Poleg._
+        > _Please replace **192.168.0.2** with your IP configuration for BMC._
 
     * Execute the following command in the console program.
       ```
@@ -1238,7 +1234,7 @@ A common use of LDAP is to provide a central place to store usernames and passwo
       > _Please replace **192.168.0.101** with your IP configuration for Ubuntu._  
       > _The ldapsearch example is to display all the data stored in the LDAP server using a TLS connection._
 
-    * You could use the account **user1** stored in the LDAP server to log in WebUI running on Poleg.
+    * You could use the account **user1** stored in the LDAP server to log in WebUI running on BMC.
 
       + Some descriptions about the LDIF used by the LDAP server and authentication process are provided here. Please refer to the six snapshots in the following description.
         > _To login using an account, the authentication logic has to check the following criteria._  
@@ -1258,7 +1254,7 @@ A common use of LDAP is to provide a central place to store usernames and passwo
         > _**user-login-interface**: It's used as a channel via that the account logins for an **ap_group**. For example, **web** stands for logging in a BMC machine via WebUI. If **web** does not exist in any **user-login-interface** attributes an account owns under a certain ap_group, it means that the user cannot use this account to login as a member of the preferred ap_group via WebUI._
 
       + Use an LDAP tool to modify the field **macAddress** of the DN **bmc-uid=bmc1,ou=bmc,dc=ldap,dc=example,dc=com** stored in the LDAP server.
-        > _The modification is to use the mac address of the ethernet module on Poleg you currently test with._
+        > _The modification is to use the mac address of the ethernet module on BMC you currently test with._
 
       + To get the mac address desired, input the following command in the console program.
         ```
@@ -1267,7 +1263,7 @@ A common use of LDAP is to provide a central place to store usernames and passwo
         > _Locate the keyword **HWaddr** displayed in the console program._  
         > _Copy the value next to HWaddr to override the value of the field **macAddress** of the DN **bmc-uid=bmc1,ou=bmc,dc=ldap,dc=example,dc=com**._
 
-      + Launch a browser and navigate to the Poleg's IP address.
+      + Launch a browser and navigate to the BMC's IP address.
         > _Bypass the secure warning and continue to the website._
 
       + Use user1/123 to log in WebUI.
@@ -1292,33 +1288,33 @@ A common use of LDAP is to provide a central place to store usernames and passwo
 
       + Log out WebUI and login again with the new password for user1.
 
-    * Log in Poleg via SSH using an LDAP account.
-      + Make sure that configurations stated in Step 5 for Poleg and Ubuntu are set accordingly and ping between Ubuntu and Poleg is okay.
+    * Log in BMC via SSH using an LDAP account.
+      + Make sure that configurations stated in Step 5 for BMC and Ubuntu are set accordingly and ping between Ubuntu and BMC is okay.
       + Install **ssh** in Ubuntu with root privilege if ssh client is not available. Open a terminal and input the following command.
         ```
         sudo apt-get install ssh
         ```
 
-      + Open a terminal in Ubuntu to log in Poleg using the LDAP account **user1** and its password via SSH. Input the following command in the terminal.
+      + Open a terminal in Ubuntu to log in BMC using the LDAP account **user1** and its password via SSH. Input the following command in the terminal.
         ```
         ssh user1@192.168.0.2
         ```
-        > _Please replace **192.168.0.2** with your IP configuration for Poleg._  
+        > _Please replace **192.168.0.2** with your IP configuration for BMC._
         > _It requires the account to be in the priv-admin group in the LDAP group database for accessing SSH._  
         > _Please refer to [group.ldif](https://github.com/Nuvoton-Israel/openbmc-util/blob/master/ldap_server/ldif/group.ldif) for more details._
 
     * Execute ipmi commands using an LDAP account.
-      + Make sure that configurations stated in Step 5 for Poleg and Ubuntu are set accordingly and ping between Ubuntu and Poleg is okay.
+      + Make sure that configurations stated in Step 5 for BMC and Ubuntu are set accordingly and ping between Ubuntu and BMC is okay.
       + Install **ipmitool** in Ubuntu with root privilege for the demonstration purpose. Open a terminal and input the following command.
         ```
         sudo apt-get install ipmitool
         ```
 
-      + Open a terminal in Ubuntu to execute ipmi commands to Poleg using the LDAP account **user2** and its password **123** via ipmitool. Input the following command in the terminal.
+      + Open a terminal in Ubuntu to execute ipmi commands to BMC using the LDAP account **user2** and its password **123** via ipmitool. Input the following command in the terminal.
         ```
         sudo ipmitool -H 192.168.0.2 -U user2 -P 123 -I lanplus user list
         ```
-        > _Please replace **192.168.0.2** with your IP configuration for Poleg._
+        > _Please replace **192.168.0.2** with your IP configuration for BMC._
         > _Only limited ipmi commands are supported._
 
 **Maintainer**
@@ -1743,7 +1739,7 @@ enable-nuvoton-p2a-vga
 # Image Size
 Type          | Size    | Note                                                                                                     |
 :-------------|:------- |:-------------------------------------------------------------------------------------------------------- |
-image-uboot   |  450 KB | u-boot 2019.01 + bootblock for Poleg only                                                                       |
+image-uboot   |  450 KB | u-boot 2019.01 + bootblock for NPCM750 only                                                                       |
 image-kernel  |  4.0 MB   | linux 5.2.11 version                                                                                       |
 image-rofs    |  18.0 MB  | bottom layer of the overlayfs, read only                                                                 |
 image-rwfs    |  0 MB  | middle layer of the overlayfs, rw files in this partition will be created at runtime,<br /> with a maximum capacity of 3 MB|
