@@ -174,6 +174,7 @@ It's verified with Nuvoton's NPCM750 Olympus solution and Quanta RunBMC.
 * Tyrone Ting
 
 ### Virtual Media
+<img align="right" width="20%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/3e65e7a/openbmc/vm_app_win.png">
 <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/cab7306/openbmc/vm.png">
 
 Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Block Device(NBD) and Mass Storage(MSTG).
@@ -210,13 +211,13 @@ Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Bloc
 
 4. VM standalone application
     * Download [application source code](https://github.com/Nuvoton-Israel/openbmc-util/tree/master/virtual_media_openbmc2.6)
-    * Follow [readme](https://github.com/Nuvoton-Israel/openbmc-util/blob/master/virtual_media_openbmc2.6/NBDServerWSWindows/README) instuctions install QT and Openssl
+    * Follow [readme](https://github.com/Nuvoton-Israel/openbmc-util/blob/master/virtual_media_openbmc2.6/NBDServerWSWindows/README) instructions install QT and Openssl
     * Start QT creator, open project **VirtualMedia.pro**, then build all
     * Launch windows/linux application
         > _NOTICE : use `sudo` to launch app in linux and install `nmap` first_
     *  Operations
         + After `Chose an Image File` or `Select an USB Drive`, click `Search` to check which BMCs are on line
-        + Select any on line BMC and key in `Account/Password` and click `Start VM` to start VM network service (still not hook USB disk to host platform)
+        + Select any on line BMC and key in `Account/Password`, choose the `Export Type` to Image, and click `Start VM` to start VM network service (still not hook USB disk to host platform)
         + After `Start VM`, click `Mount USB` to hook the emulated usb disk to host platform, or click `Stop VM` to stop VM network service.
         + After `Mount USB`, click `UnMount USB` to emulate unplugging the usb disk from host platform
         + After `UnMount USB`, click `Stop VM` to stop VM network service, or click `Mount USB` to hook USB disk to host platform.
@@ -235,27 +236,37 @@ This is a secure flash update mechanism to update BMC firmware via WebUI.
 
 **How to use**
 
-1. Upload update package from webui, then you will see
-    ```
-    Activate
-    ```
-    > if you select activate, then you will see activation dialog at item 2
+* Update firmware via WebUI
+    1. Upload update package from web UI, then you will see
+        ```
+        Activate
+        ```
+        > If you select activate, then you will see activation dialog at item 2
 
-    ```
-    Delete
-    ```
-    > If you select delete, then the package will be deleted right now
+        ```
+        Delete
+        ```
+        > If you select delete, then the package will be deleted right now
 
-2. Confirm BMC firmware file activation
-    ```
-    ACTIVATE FIRMWARE FILE WITHOUT REBOOTING BMC
-    ```
-    > if you select this, you need to reboot BMC manually, and shutdown application will run update script to flash image into spi flash
+    2. Confirm BMC firmware file activation
+        ```
+        ACTIVATE FIRMWARE FILE WITHOUT REBOOTING BMC
+        ```
+        > If you select this, you need to reboot BMC manually, and shutdown application will run update script to flash image into SPI flash
 
+        ```
+        ACTIVATE FIRMWARE FILE AND AUTOMATICALLY REBOOT BMC
+        ```
+        > if you select this, BMC will shutdown right now, and shutdown application will run update script to flash image into SPI flash
+
+* Update firmware via Redfish
+
+    We can update BMC firmware via REST API provided by Redfish. The firmware will apply immediately after uploaded without any confirmation by default.
+    The following command shows how to using curl command upload BMC firmware.
     ```
-    ACTIVATE FIRMWARE FILE AND AUTOMATICALLY REBOOT BMC
+    curl -X POST -H "x-auth-token: ${token}" --data-binary obmc-phosphor-image-olympus-nuvoton.static.mtd.tar https://${BMC_IP}/redfish/v1/UpdateService
     ```
-    > if you select this, BMC will shutdown right now, and shutdown application will run update script to flash image into spi flash
+    >_${token} is the token value come from login API, read more information from [REST README](https://github.com/openbmc/docs/blob/master/REST-cheatsheet.md)_
 
 **Maintainer**
 
@@ -316,6 +327,8 @@ This is a secure flash update mechanism to update BMC firmware via WebUI.
 
 * Update BIOS
 
+  There are two way updating BIOS image just like BMC firmware update.
+
   1. WebUI
 
       Upload tar image, and active it.
@@ -331,7 +344,7 @@ This is a secure flash update mechanism to update BMC firmware via WebUI.
 
   2. Redfish
 
-      We can update BIOS image via REST API just like BMC image. And the image will apply immediately after uploaded by default.
+      We can update BIOS image via REST API just like BMC firmware. And the image will apply immediately after uploaded by default.
       ```
       curl -X POST -H "x-auth-token: ${token}" --data-binary image-bios.tar https://${BMC_IP}/redfish/v1/UpdateService
       ```
