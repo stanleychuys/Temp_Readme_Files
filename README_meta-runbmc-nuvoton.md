@@ -675,13 +675,13 @@ Server Power Operations are using to Power on/Warm reboot/Cold reboot/Orderly sh
 <img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/master/openbmc/ServerLed.PNG">  
 
 Turning on ServerLED via WebUI will make **identify** leds on BMC start blinking,
- and **heartbeat** will start blinklin after BMC booted.
+ and **heartbeat** will start blinkling after BMC booted.
 
 **Source URL**
 * [https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/leds](https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/leds)
 
 **How to use**
-* Add enclosure_identify in LED [config file](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/leds/olympus-nuvoton-led-manager-config/led.yaml)
+* Add EnclosureIdentify in LED [config file](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/leds/olympus-nuvoton-led-manager-config/led.yaml)
   ```
   BmcBooted:
     heartbeat:
@@ -695,7 +695,7 @@ Turning on ServerLED via WebUI will make **identify** leds on BMC start blinking
         Period: 1000
   ```
 
-* Modify BSP layer [config](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/conf/machine/olympus-nuvoton.conf) to select npcm750 LED config file
+* Modify BSP layer [config](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/conf/machine/olympus-nuvoton.conf) to select NPCM750 LED config file
   ```
   PREFERRED_PROVIDER_virtual/phosphor-led-manager-config-native = "npcm750-led-manager-config-native"
   ```
@@ -817,7 +817,7 @@ In NPCM750, we have two PWM modules and support eight PWM signals to control fan
 **How to use**
 <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/8fc19a1/openbmc/fan_rpms.png">
 
-In order to automatically apply accurate and responsive correction to a fan control function, we use the swampd to handle output PWM signal. For enable this daemon, basically we need configuring the swampd configuration file and add a system service for start this daemon as below steps.
+In order to automatically apply accurate and responsive correction to a fan control function, we use the `swampd` to handle output PWM signal. For enable this daemon, basically we need configuring the swampd configuration file and add a system service for start this daemon as below steps.
 
 * The swampd(PID control daemon) is a Margin-based daemon running within the OpenBMC environment. It uses a well-defined [configuration file](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/fans/phosphor-pid-control/config-olympus-nuvoton.json) to control the temperature of the tray components to keep them within operating conditions.
 
@@ -923,7 +923,7 @@ In order to automatically apply accurate and responsive correction to a fan cont
 
 The Serial over LAN (SoL) via IPMI redirects the output of the server’s serial port to a command/terminal window on your workstation.
 
-The user uses the ipmi tool like [ipmiutil](http://ipmiutil.sourceforge.net/) to interact with SOL via IPMI. Here the [ipmiutil](http://ipmiutil.sourceforge.net/) is used as an example.
+The user uses the ipmi tool like [ipmiutil](http://ipmiutil.sourceforge.net/) to interact with SOL via IPMI. Here the ipmiutil is used as an example.
 
 The patch integrates [phosphor-net-ipmid](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/ipmi/phosphor-ipmi-net_%25.bbappend) into Nuvoton's NPCM750 solution for OpenBMC.
 
@@ -972,9 +972,9 @@ Please refer to [IPMI Website](https://www.intel.com/content/www/us/en/products/
 
 <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/dfdfd04/openbmc/message_bridge.png">
 
-IPMI daemon would set or get D-Bus property to/from path like: _/xyz/openbmc_project/control/host0/power_cap_ when get DCMI command from IPMI tool via network or LPC.
+IPMI daemon would set or get D-Bus property to/from path like: `/xyz/openbmc_project/control/host0/power_cap` when get DCMI command from IPMI tool via network or LPC.
 [Phosphor-node-manager-proxy](https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/ipmi/phosphor-node-manager-proxy) will handle the property change and present the property value.
-Once the **phosphor-node-manager-proxy** property changed, it will prepare IPMB package data and call D-Bus method "sendRequest" to D-Bus path: _/xyz/openbmc_project/Ipmi/Channel/Ipmb_.
+Once the **phosphor-node-manager-proxy** property changed, it will prepare IPMB package data and call D-Bus method "sendRequest" to D-Bus path: `/xyz/openbmc_project/Ipmi/Channel/Ipmb`.
 Finally, IPMB gets the request and constructs I2C command from the request, then sends the I2C command to ME(Intel Management Engine) for getting information which controlled by ME.
 
 The patch integrates the [ipmid](https://github.com/openbmc/phosphor-host-ipmid), [phosphor-node-manager-proxy](https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/ipmi/phosphor-node-manager-proxy) and [ipmbbridge](https://github.com/openbmc/ipmbbridge) projects.
@@ -999,7 +999,7 @@ The patch integrates the [ipmid](https://github.com/openbmc/phosphor-host-ipmid)
     ]
     ```
 
-2. Deploy **phosphor-node-manager-proxy** from Intel-BMC project [node-manager](https://github.com/Intel-BMC/node-manager), because the project still not merge in OpenBMC project. And modify the interface define if need. The patch [0001-change-the-value-number-from-int64-to-double.patch](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/ipmi/phosphor-node-manager-proxy/0001-change-the-value-number-from-int64-to-double.patch) for node manager is change the property type that make bmcweb can get the sensor value on web UI.
+2. Deploy **phosphor-node-manager-proxy** from Intel-BMC project [node-manager](https://github.com/Intel-BMC/node-manager), because the package still not merge in OpenBMC project. And modify the interface define if need. The patch [0001-change-the-value-number-from-int64-to-double.patch](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/ipmi/phosphor-node-manager-proxy/0001-change-the-value-number-from-int64-to-double.patch) for node manager is change the property type that make bmcweb can get the sensor value on web UI.
 
 3. Install the ipmitool in host OS, here using Ubuntu 18.04 as example.
 
@@ -1008,7 +1008,7 @@ The patch integrates the [ipmid](https://github.com/openbmc/phosphor-host-ipmid)
       sudo apt install ipmitool
       ```
 
-4. Test message bridging.
+4. Test power budget control.
 
     * Send DCMI commnad via LPC
       ```
@@ -1044,7 +1044,7 @@ The patch integrates the [ipmid](https://github.com/openbmc/phosphor-host-ipmid)
 
 # LDAP for User Management
 <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/b6fdec0d/openbmc/ldap-login-via-ssh.png">
-<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/master/openbmc/access_ldap_via_poleg.PNG">
+<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/master/openbmc/access_ldap_via_bmc.png">
 
 The Lightweight Directory Access Protocol (LDAP) is an open, vendor-neutral, industry standard application protocol for accessing and maintaining distributed directory information services over an Internet Protocol (IP) network.
 
@@ -1061,7 +1061,7 @@ A common use of LDAP is to provide a central place to store usernames and passwo
 
 **How to use**
 
-1. The user is expected to know how to follow the instructions in the section **Setting up your OpenBMC project** in [Nuvoton-Israel/openbmc](https://github.com/Nuvoton-Israel/openbmc) to build and program an OpenBMC image into NPCM750 platforms.
+1. The user is expected to know how to follow the instructions in the section **Setting up your OpenBMC project** in [Nuvoton-Israel/openbmc](https://github.com/Nuvoton-Israel/openbmc/tree/runbmc) to build and program an OpenBMC image into NPCM750 platforms.
     > _Prepare a PC which builds OpenBMC. (called the build machine hereafter)_  
     > _The user is also expected to have knowledge of LDAP and its operations._
 
@@ -1154,7 +1154,7 @@ A common use of LDAP is to provide a central place to store usernames and passwo
       
       + Copy ca_certs.pem, ldap_server.pem and ldap_server.key into locations specified above with root privilege.
 
-    * Add LDAP schema and LDIF.
+    * Add LDAP schema and LDIF (LDAP Data Interchange Format).
       + Download [user_exp.schema](https://github.com/Nuvoton-Israel/openbmc-util/blob/master/ldap_server/schema/user_exp.schema) and save it at /usr/local/etc/openldap/schema with root privilege in Ubuntu.
       + Modify /usr/local/etc/openldap/slapd.conf in Ubuntu with root privilege to specify the schema just saved.
         > _include /usr/local/etc/openldap/schema/user_exp.schema_
@@ -1214,12 +1214,12 @@ A common use of LDAP is to provide a central place to store usernames and passwo
 
 5. Test LDAP server.
 
-    * Connect BMC to the PC running Ubuntu with an ethernet cable and power on it.
+    * Connect BMC and LDAP server in same local network and power on it.
     * Log in BMC from the console program (like Tera Term) with the root account (root/0penBmc).
       > _The console program is used to display a debug console provided by BMC._
 
     * The IP address for the LDAP server is 192.168.0.101 for now.
-    * Set up IP addresses for BMC and Ubuntu so that they can ping each other.
+    * Set up IP addresses for BMC and LDAP server so that they can ping each other.
       + For example, set BMC's IP address to 192.168.0.2. Input the following command in the console program.
         ```
         ifconfig eth2 192.168.0.2
@@ -1230,52 +1230,52 @@ A common use of LDAP is to provide a central place to store usernames and passwo
     * Execute the following command in the console program.
       ```
       ldapsearch -ZZ -h 192.168.0.101 -D "cn=admin,dc=ldap,dc=example,dc=com" -b "dc=ldap,dc=example,dc=com" -w secret
-      ```  
-      > _Please replace **192.168.0.101** with your IP configuration for Ubuntu._  
+      ```
+      > _Please replace **192.168.0.101** with your IP configuration for LDAP server._
       > _The ldapsearch example is to display all the data stored in the LDAP server using a TLS connection._
 
     * You could use the account **user1** stored in the LDAP server to log in WebUI running on BMC.
 
       + Some descriptions about the LDIF used by the LDAP server and authentication process are provided here. Please refer to the six snapshots in the following description.
-        > _To login using an account, the authentication logic has to check the following criteria._  
-        > _**bmc-uid**: It stands for the BMC machine that the account is used to login. The BMC machines are grouped by DN **ou=ap_group,dc=ldap,dc=example,dc=com**. One BMC machine can be in multiple groups at the same time. (see **ap_group** below)_  
+        > _To login an account, the authentication logic has to check the following criteria._
+        > _**bmc-uid**: It stands for the BMC machine that the account is used to login. The BMC machines are grouped by DN **ou=ap_group,dc=ldap,dc=example,dc=com**. One BMC machine can be in multiple groups at the same time. (see **ap_group** below)_
         <img width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/c8c60b29/openbmc/bmc1_info.png">
-        <img width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/c8c60b29/openbmc/bmc2_info.png">  
+        <img width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/c8c60b29/openbmc/bmc2_info.png">
         
-        > _**ap_group**: Applications like web server, email, ftp and so on are deployed on the servers attched by BMC machines. Therefore, grouping by applications is taken into the authentication process. The authentication refuses an account to log in some BMC machine if that machine is not deployed under the certain **ap_group** the account also joins._  
+        > _**ap_group**: Applications like web server, email, ftp and so on are deployed on the servers attched by BMC machines. Therefore, grouping by applications is taken into the authentication process. The authentication refuses an account to log in some BMC machine if that machine is not deployed under the certain **ap_group**_
         <img width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/c8c60b29/openbmc/email_info.png">
-        <img width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/c8c60b29/openbmc/webserver_info.png">  
+        <img width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/c8c60b29/openbmc/webserver_info.png">
         
-        > _**people**: It contains the account information (login/privileges) stored in the LDAP server. An account can join multiple **ap_group** simutaneously._  
+        > _**people**: It contains the account information (login/privileges) stored in the LDAP server. An account can join multiple **ap_group** simutaneously._
         <img width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/c8c60b29/openbmc/user1_logininfo.png">
-        <img width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/c8c60b29/openbmc/user2_logininfo.png">  
+        <img width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/c8c60b29/openbmc/user2_logininfo.png">
         
-        > _**user-login-disabled**: While this attribute's value is 1, it is not allowed to login with the account's membership of the specific **ap_group**_.  
+        > _**user-login-disabled**: While this attribute's value is 1, it is not allowed to login with the account's membership of the specific **ap_group**_.
         > _**user-login-interface**: It's used as a channel via that the account logins for an **ap_group**. For example, **web** stands for logging in a BMC machine via WebUI. If **web** does not exist in any **user-login-interface** attributes an account owns under a certain ap_group, it means that the user cannot use this account to login as a member of the preferred ap_group via WebUI._
 
       + Use an LDAP tool to modify the field **macAddress** of the DN **bmc-uid=bmc1,ou=bmc,dc=ldap,dc=example,dc=com** stored in the LDAP server.
-        > _The modification is to use the mac address of the ethernet module on BMC you currently test with._
+        > _The mac address modification is for the ethernet module on BMC you currently test with._
 
       + To get the mac address desired, input the following command in the console program.
         ```
         ifconfig eth0
         ```
-        > _Locate the keyword **HWaddr** displayed in the console program._  
+        > _Locate the keyword **HWaddr** displayed in the console program._
         > _Copy the value next to HWaddr to override the value of the field **macAddress** of the DN **bmc-uid=bmc1,ou=bmc,dc=ldap,dc=example,dc=com**._
 
       + Launch a browser and navigate to the BMC's IP address.
         > _Bypass the secure warning and continue to the website._
 
       + Use user1/123 to log in WebUI.
-        > _user1 is the login ID._  
-        > _123 is the login password._  
-        > _The **bmc-uid** for the BMC machine used for this test is bmc1. According to the LDIF provided, the BMC machine bmc1 is deployed under the **ap_group** email and the the BMC machine bmc2 is deployed under **ap_group** webserver. Also one can tell from the snapshots, user1 and user2 have different **user-login-interface** settings for the **ap_group** email and **ap_group** webserver respectively._  
-        > _User1 is able to log on bmc1 via WebUI since the following conditions are met: the BMC machine bmc1 is deployed under **ap_group** email.; user1 is a member of the **ap_group** email.; user1 has an **user-login-interface** setting as **web** for that group and value of user1's **user-login-disabled** attribute is not set._  
-        > _Although user2 is also a member of the **ap_group** email, it does not have an **user-login-interface** setting as **web** for that group. Under such conditions, user2 is not allowed to log on bmc1. User2 does have an **user-login-interface** setting as **web** for the **ap_group** webserver but bmc1 is not deployed under the **ap_group** webserver._  
+        > _user1 is the login ID._
+        > _123 is the login password._
+        > _The **bmc-uid** for the BMC machine used for this test is bmc1. According to the LDIF provided, the BMC machine bmc1 is deployed under the **ap_group** email and the the BMC machine bmc2 is deployed under **ap_group** webserver. Also one can tell from the snapshots, user1 and user2 have different **user-login-interface** settings for the **ap_group** email and **ap_group** webserver respectively._
+        > _User1 is able to log on bmc1 via WebUI since the following conditions are met: the BMC machine bmc1 is deployed under **ap_group** email.; user1 is a member of the **ap_group** email.; user1 has an **user-login-interface** setting as **web** for that group and value of user1's **user-login-disabled** attribute is not set._
+        > _Although user2 is also a member of the **ap_group** email, it does not have an **user-login-interface** setting as **web** for that group. Under such conditions, user2 is not allowed to log on bmc1. User2 does have an **user-login-interface** setting as **web** for the **ap_group** webserver but bmc1 is not deployed under the **ap_group** webserver._
         > _The description above explains why user1 is used for this test._
 
     * Password modification is also available to LDAP accounts via WebUI.
-      + Log in WebUI using user1/123 as mentioned in previous phrase.
+      + Log in WebUI using user1/123 as mentioned in previous section.
       + Navigate to `Access control` menu item on the left panel and select it.
       + A sub menu item `Local users` pops up and select it.
       + Modify the password value for user1 by selecting the icon at just the right side of the text area "Account status".
@@ -1286,10 +1286,10 @@ A common use of LDAP is to provide a central place to store usernames and passwo
       + Press the `Save` button.
         > _A message **Success! User has been updated successfully.** is expected to show then._
 
-      + Log out WebUI and login again with the new password for user1.
+      + Log out WebUI and log in again with the new password for user1.
 
     * Log in BMC via SSH using an LDAP account.
-      + Make sure that configurations stated in Step 5 for BMC and Ubuntu are set accordingly and ping between Ubuntu and BMC is okay.
+      + Make sure that configurations stated in Step 5 for BMC and LDAP server are set accordingly and ping between LDAP server and BMC is okay.
       + Install **ssh** in Ubuntu with root privilege if ssh client is not available. Open a terminal and input the following command.
         ```
         sudo apt-get install ssh
@@ -1304,7 +1304,7 @@ A common use of LDAP is to provide a central place to store usernames and passwo
         > _Please refer to [group.ldif](https://github.com/Nuvoton-Israel/openbmc-util/blob/master/ldap_server/ldif/group.ldif) for more details._
 
     * Execute ipmi commands using an LDAP account.
-      + Make sure that configurations stated in Step 5 for BMC and Ubuntu are set accordingly and ping between Ubuntu and BMC is okay.
+      + Make sure that configurations stated in Step 5 for BMC and LDAP server are set accordingly and ping between LDAP server and BMC is okay.
       + Install **ipmitool** in Ubuntu with root privilege for the demonstration purpose. Open a terminal and input the following command.
         ```
         sudo apt-get install ipmitool
@@ -1334,44 +1334,48 @@ JTAG master is implemented on BMC to facilitate debugging host CPU or programmin
 The Intel® At-Scale Debug feature allows for using any host system to run the Debug tool stack while connecting to the target system across the network. The target system must have a BMC which has physical connectivity to the JTAG pins as a minimum requirement of functionality.    
 
 **How to use**
-1. switch JPC1 jumper to 2-3
+
+Here uses the RunBMC Olympus server as example.
+
+1. switch JPC1 jumper on host to 2-3.
 2. configure GPIO40(BMC_XDP_JTAG_SEL_N) to connect BMC JTAG to Host CPU
-```
-echo 40 > /sys/class/gpio/export
-echo 0 > /sys/class/gpio/gpio40/value 
-```
+    ```
+    echo 40 > /sys/class/gpio/export
+    echo 0 > /sys/class/gpio/gpio40/value
+    ```
 3. configure BMC_TCK_MUX_SEL pin to CPU TCK
-```
-echo 22 > /sys/class/gpio/export
-echo 1 > /sys/class/gpio/gpio22/value
-```
-3. Run ASD daemon on BMC
-```
-asd -u -n eth1 --log-level=warning -p 5123
-```
-4. Launch CScripts on debug host
-```
-Assume CScripts source folder = $CS, OpenIPC source folder = $OIPC
-Edit $OIPC/openipc/Config/SKX/SKX_ASD_RC-Pins.xml
-- Change ip address to BMC ip address
-Edit $OIPC/openipc/Config/OpenIpcConfig.xml
-- Change DefaultIpcConfig tag as <DefaultIpcConfig Name="SKX_ASD_RC-Pins"/>
-export IPC_PATH=$OIPC/openipc/Bin
-export LD_LIBRARY_PATH=$IPC_PATH
-Go to $CS/cscripts, execute "python startCscripts.py -a ipc"
-```
-5. Execute OpenIPC idcode operation in CScripts command prompt. It will show the TAP device's idcode.
-```
->>> import ipccli
->>> ipc = ipccli.baseaccess()
->>> ipc.idcode(0)
-```
+    ```
+    echo 22 > /sys/class/gpio/export
+    echo 1 > /sys/class/gpio/gpio22/value
+    ```
+4. Run ASD daemon on BMC
+    ```
+    asd -u -n eth1 --log-level=warning -p 5123
+    ```
+5. Launch CScripts on debug host
+    ```
+    Assume CScripts source folder = $CS, OpenIPC source folder = $OIPC
+    Edit $OIPC/openipc/Config/SKX/SKX_ASD_RC-Pins.xml
+    - Change ip address to BMC ip address
+    Edit $OIPC/openipc/Config/OpenIpcConfig.xml
+    - Change DefaultIpcConfig tag as <DefaultIpcConfig Name="SKX_ASD_RC-Pins"/>
+    export IPC_PATH=$OIPC/openipc/Bin
+    export LD_LIBRARY_PATH=$IPC_PATH
+    Go to $CS/cscripts, execute "python startCscripts.py -a ipc"
+    ```
+6. Execute OpenIPC idcode operation in CScripts command prompt. It will show the TAP device's idcode.
+    ```
+    >>> import ipccli
+    >>> ipc = ipccli.baseaccess()
+    >>> ipc.idcode(0)
+    ```
 
 
 ### CPLD Programming
 The motherboard on server have a CPLD device that can be upgraded firmware on it. BMC can load svf file to program CPLD via JTAG.  
 
-**How to use**  
+**How to use**
+
 run loadsvf on Runbmc to program CPLD. Specify the svf file name with -s.
 ```
 loadsvf -d /dev/jtag0 -s firmware.svf
@@ -1379,6 +1383,7 @@ loadsvf -d /dev/jtag0 -s firmware.svf
 
 **Maintainer**
 * Stanley Chu
+
 
 ## System Event Policy
 
@@ -1390,17 +1395,19 @@ phosphor-dbus-monitor service can watch on specific dbus objects/properties and 
 
 
 ### Event Callbacks
-The event callbacks can be the following actions. Logging to journal or elog, calling d-bus method, or sending snmp trap. Here is an example that log to journal and send d-bus message to shutdown host when the specific temperature sensor reaches the critical high threshold.  
+The event callbacks can be the following actions. Logging to journal or elog, calling d-bus methods, or sending snmp traps. Here is an example that log to journal and send d-bus message to shutdown host when the specific temperature sensor reaches the critical high threshold.
 
 * [Example config](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-runbmc-nuvoton/recipes-phosphor/configuration/runbmc-nuvoton-yaml-config/runbmc-nuvoton-dbus-monitor-config.yaml)
 
 ### SNMP trap
 **How to use** 
 1. Install snmp trap receiver on the management server. Refer to the [link](https://blog.cadena-it.com/linux-tips-how-to/snmp-trap-receiver-with-ubuntu/) for the installation.
-    * Copy [BMC notification MIB](https://github.com/openbmc/phosphor-snmp/blob/master/mibs/NotificationMIB.txt) to /usr/share/snmp/mibs.
+    * Copy [BMC notification MIB](https://github.com/openbmc/phosphor-snmp/blob/master/mibs/NotificationMIB.txt) to `/usr/share/snmp/mibs`.
     * Run snmptrapd with -m option to load custom MIB
-       * snmptrapd -m OPENBMC-NOTIFICATION-MIB -Lf /var/log/snmptrap.log -f
-2. Specify snmp manager ip/port in openbmc WebUI
+    ```
+    snmptrapd -m OPENBMC-NOTIFICATION-MIB -Lf /var/log/snmptrap.log -f
+    ```
+2. Specify snmp manager ip/port in Openbmc WebUI
    ```
     Server configuration
      -> SNMP settings
@@ -1432,7 +1439,9 @@ This is a secure flash update mechanism to update HOST/BMC firmware via LPC/PCI.
 * [https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-phosphor/nuvoton-layer/recipes-phosphor/ipmi/phosphor-ipmi-flash_%25.bbappend](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-phosphor/nuvoton-layer/recipes-phosphor/ipmi/phosphor-ipmi-flash_%25.bbappend)
 
 ### HOST Tool
-<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/322d0d3/openbmc/in-band-fu.png">The host-tool depends on ipmi-blob-tool and pciutils.
+<img align="right" width="30%" src="https://raw.githubusercontent.com/NTC-CCBG/snapshots/322d0d3/openbmc/in-band-fu.png">
+
+The host-tool depends on `ipmi-blob-tool` and `pciutils`.
 
 #### Building pciutils
 Check out the [pciutils source](https://github.com/pciutils/pciutils).
@@ -1471,62 +1480,59 @@ make install
 **How to use**
 1. If you want to do firmware update over LPC, then you need to check the memory address which BIOS allocates for LPC.
 You could use "ioport" tool and following commands to get the address.
+    ```
+    sudo outb 0x4e 0x07
+    sudo outb 0x4f 0x0f
 
-```
-sudo outb 0x4e 0x07
-sudo outb 0x4f 0x0f
+    # Host address a7-a0
+    sudo outb 0x4e 0xF4
+    sudo inb 0x4f
 
-# Host address a7-a0
-sudo outb 0x4e 0xF4
-sudo inb 0x4f
+    # Host address a15-a8
+    sudo outb 0x4e 0xF5
+    sudo inb 0x4f
 
-# Host address a15-a8
-sudo outb 0x4e 0xF5
-sudo inb 0x4f
+    # Host address a23-a16
+    sudo outb 0x4e 0xF6
+    sudo inb 0x4f
 
-# Host address a23-a16
-sudo outb 0x4e 0xF6
-sudo inb 0x4f
+    # Host address a32-a24
+    sudo outb 0x4e 0xF7
+    sudo inb 0x4f
 
-# Host address a32-a24
-sudo outb 0x4e 0xF7
-sudo inb 0x4f
+    # shm active?
+    sudo outb 0x4e 0x30
+    sudo inb 0x4f
 
-# shm active?
-sudo outb 0x4e 0x30
-sudo inb 0x4f
+    ```
 
-```
-2. Here is an example for upadting over LPC,and --length is fixed.
+2. Here is an example for upadting over LPC, and --length is fixed.
+    ```
+    sudo ./burn_my_bmc --command update --interface ipmilpc --image image-bmc --sig image-bmc.sig --type image --address 0x817e0000 --length 0x1000
+    ```
 
-```
-sudo ./burn_my_bmc --command update --interface ipmilpc --image image-bmc --sig image-bmc.sig --type image --address 0x817e0000 --length 0x1000
-```
 3. Here is an example for upadting over PCI(both VGA and MailBox)and --type is fixed
-
-```
-sudo ./burn_my_bmc --command update --interface ipmipci --image image-bmc --sig image-bmc.sig --type image
-```
+    ```
+    sudo ./burn_my_bmc --command update --interface ipmipci --image image-bmc --sig image-bmc.sig --type image
+    ```
 
 ### IPMI Library
 This is an OpenBMC IPMI Library (Handler) for In-Band Firmware Update.
 
 **How to use**
-1. You need to enable the way you want to transfer data from host to bmc
+1. You need to enable the way you want to transfer data from host to BMC
+    ```
+    nuvoton-lpc
+    enable-nuvoton-p2a-mbox
+    enable-nuvoton-p2a-vga
+    ```
 
-```
-nuvoton-lpc
-enable-nuvoton-p2a-mbox
-enable-nuvoton-p2a-vga
-```
-
-2.select the corresponding address for IPMI_FLASH_BMC_ADDRESS_nuvoton
-
-```
-0x7F400000
-0xF0848000
-0xc0008000
-```
+2. select the corresponding address for IPMI_FLASH_BMC_ADDRESS_nuvoton
+    ```
+    0x7F400000
+    0xF0848000
+    0xc0008000
+    ```
 
 **Maintainer**
 * Medad CChien
@@ -1757,3 +1763,4 @@ image-rwfs    |  0 MB  | middle layer of the overlayfs, rw files in this partiti
 * 2019.12.18 Update Message Bridging, and VM application
 * 2019.12.19 Rename Message Bridging to Host Power Budget Control
 * 2019.12.19 Add Fan PID control
+* 2019.12.23 Fix some typo and text format
