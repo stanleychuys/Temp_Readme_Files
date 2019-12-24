@@ -186,40 +186,43 @@ Virtual Media (VM) is to emulate an USB drive on remote host PC via Network Bloc
 
 **How to use**
 
-1. Clone a physical usb drive to an image file
+1. Clone a physical USB drive to an image file
     * For Linux - use tool like **dd**
       ```
       dd if=/dev/sda of=usb.img bs=1M count=100
       ```
       > _**bs** here is block size and **count** is block count._
       >
-      > _For example, if the size of your usb drive is 1GB, then you could set "bs=1M" and "count=1024"_
+      > _For example, if the size of your USB drive is 1GB, then you could set "bs=1M" and "count=1024"_
 
     * For Windows - use tool like **Win32DiskImager.exe**
 
-    > _NOTICE : A simple *.iso file cannot work for this._
+      > _NOTICE : A simple *.iso file cannot work for this._
 
-2. Login and switch to webpage of VM on your browser
-    ```
-    https://XXX.XXX.XXX.XXX/#/server-control/virtual-media
-    ```
+2. Enable Virtual Media
 
-3. Operations of Virtual Media
-    * After `Choose File`, click `Start` to start VM network service
-    * After clicking `Start`, you will see a new usb device on HOST OS
-    * If you want to stop this service, just click `Stop` to stop VM network service.
+    2.1 VM-WEB
+    1. Login and switch to webpage of VM on your browser
+        ```
+        https://XXX.XXX.XXX.XXX/#/server-control/virtual-media
+        ```
 
-4. VM standalone application
+    2. Operations of Virtual Media
+        * After `Choose File`, click `Start` to start VM network service
+        * After clicking `Start`, you will see a new USB device on HOST OS
+        * If you want to stop this service, just click `Stop` to stop VM network service.
+
+    2.2 VM standalone application
     * Download [application source code](https://github.com/Nuvoton-Israel/openbmc-util/tree/master/virtual_media_openbmc2.6)
-    * Follow [readme](https://github.com/Nuvoton-Israel/openbmc-util/blob/master/virtual_media_openbmc2.6/NBDServerWSWindows/README) instructions install QT and Openssl
+    * Follow the [readme](https://github.com/Nuvoton-Israel/openbmc-util/blob/master/virtual_media_openbmc2.6/NBDServerWSWindows/README) instructions install QT and Openssl
     * Start QT creator, open project **VirtualMedia.pro**, then build all
     * Launch windows/linux application
         > _NOTICE : use `sudo` to launch app in linux and install `nmap` first_
     *  Operations
         + After `Chose an Image File` or `Select an USB Drive`, click `Search` to check which BMCs are on line
         + Select any on line BMC and key in `Account/Password`, choose the `Export Type` to Image, and click `Start VM` to start VM network service (still not hook USB disk to host platform)
-        + After `Start VM`, click `Mount USB` to hook the emulated usb disk to host platform, or click `Stop VM` to stop VM network service.
-        + After `Mount USB`, click `UnMount USB` to emulate unplugging the usb disk from host platform
+        + After `Start VM`, click `Mount USB` to hook the emulated USB disk to host platform, or click `Stop VM` to stop VM network service.
+        + After `Mount USB`, click `UnMount USB` to emulate unplugging the USB disk from host platform
         + After `UnMount USB`, click `Stop VM` to stop VM network service, or click `Mount USB` to hook USB disk to host platform.
 
 **Maintainer**
@@ -819,6 +822,9 @@ This is a patch for enabling FRU feature in [phosphor-impi-fru](https://github.c
 * Tim Lee
 
 ### Fan PID Control
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/a2260cf/openbmc/fan_stepwise_pwm.png">
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/8fc19a1/openbmc/fan_rpms.png">
+
 In NPCM750, we have two PWM modules and support eight PWM signals to control fans for dynamic adjustment according temperature variation.
 
 **Source URL**
@@ -828,9 +834,10 @@ In NPCM750, we have two PWM modules and support eight PWM signals to control fan
 * [https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/fans/phosphor-pid-control](https://github.com/Nuvoton-Israel/openbmc/tree/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/fans/phosphor-pid-control)
 
 **How to use**
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/8fc19a1/openbmc/fan_rpms.png">
 
-In order to automatically apply accurate and responsive correction to a fan control function, we use the `swampd` to handle output PWM signal. For enable this daemon, basically we need configuring the swampd configuration file and add a system service for start this daemon as below steps.
+In order to automatically apply accurate and responsive correction to a fan control function, we use the `swampd` to handle output PWM signal. For enable this daemon, basically we need configuring the swampd configuration file and deploy a system service for start this daemon as below steps.
+
+>_NOTICE: In current solution, we only use stepwise mechanism to control fans. But the swampd also can controls fan with PID by tuning parameters according to consumer platform._
 
 * The swampd(PID control daemon) is a Margin-based daemon running within the OpenBMC environment. It uses a well-defined [configuration file](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/fans/phosphor-pid-control/config-olympus-nuvoton.json) to control the temperature of the tray components to keep them within operating conditions.
 
