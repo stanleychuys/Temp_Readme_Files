@@ -822,7 +822,7 @@ This is a patch for enabling FRU feature in [phosphor-impi-fru](https://github.c
 * Tim Lee
 
 ### Fan PID Control
-<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/a2260cf/openbmc/fan_stepwise_pwm.png">
+<img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/e12e9dd/openbmc/fan_stepwise_pwm.png">
 <img align="right" width="30%" src="https://cdn.rawgit.com/NTC-CCBG/snapshots/8fc19a1/openbmc/fan_rpms.png">
 
 In NPCM750, we have two PWM modules and support eight PWM signals to control fans for dynamic adjustment according temperature variation.
@@ -837,7 +837,7 @@ In NPCM750, we have two PWM modules and support eight PWM signals to control fan
 
 In order to automatically apply accurate and responsive correction to a fan control function, we use the `swampd` to handle output PWM signal. For enable this daemon, basically we need configuring the swampd configuration file and deploy a system service for start this daemon as below steps.
 
->_NOTICE: In current solution, we only use stepwise mechanism to control fans. But the swampd also can controls fan with PID by tuning parameters according to consumer platform._
+>_NOTICE: In current solution, we only use stepwise mechanism to control fans. But the swampd also can controls fan with PID by tuning parameters according to customer platform._
 
 * The swampd(PID control daemon) is a Margin-based daemon running within the OpenBMC environment. It uses a well-defined [configuration file](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/fans/phosphor-pid-control/config-olympus-nuvoton.json) to control the temperature of the tray components to keep them within operating conditions.
 
@@ -906,7 +906,48 @@ In order to automatically apply accurate and responsive correction to a fan cont
                         "negativeHysteresis": 0.0,
                         "isCeiling": false,
                         "reading": {
-                          ...
+                            "0": 25,
+                            "1": 26,
+                            "2": 27,
+                            "3": 28,
+                            "4": 29,
+                            "5": 30,
+                            "6": 31,
+                            "7": 32,
+                            "8": 33,
+                            "9": 34,
+                            "10": 35,
+                            "11": 36,
+                            "12": 37,
+                            "13": 38,
+                            "14": 39,
+                            "15": 40,
+                            "16": 42,
+                            "17": 44,
+                            "18": 45,
+                            "19": 50
+                        },
+                        "output": {
+                            "0": 10,
+                            "1": 10,
+                            "2": 10,
+                            "3": 10,
+                            "4": 10,
+                            "5": 10,
+                            "6": 20,
+                            "7": 30,
+                            "8": 40,
+                            "9": 50,
+                            "10": 60,
+                            "11": 73,
+                            "12": 76,
+                            "13": 79,
+                            "14": 82,
+                            "15": 86,
+                            "16": 90,
+                            "17": 90,
+                            "18": 100,
+                            "19": 100
                         }
                     },
                 },
@@ -914,9 +955,21 @@ In order to automatically apply accurate and responsive correction to a fan cont
         },
     ]
     ```
-    The [PID README](https://github.com/openbmc/phosphor-pid-control/blob/master/configure.md) provide more detail about the meaning for each parameter. The most important here is the settings of readPath and writePath.
+    The [PID README](https://github.com/openbmc/phosphor-pid-control/blob/master/configure.md) provide more detail about the meaning for each parameter.
+
+    Roughly speaking, there are two main section in configuration file: **sensor** and **zones**.
+    **Sensors** defined the all component which are involved PID like temperature sensors, or fans.
+    **Zones** defined the mechanism how the swampd control each fans by setting parameters.
+
+    There are four PID controller types user can use: `fan`, `temp`, `margin`, and `stepwise`.
+    User should drive fans by setting PID type to `fan` in zones, and determine which target is using to control RPM like PID type `stepwise`, `temp` or `margin`.
+    The PID type `stepwise` control fans by temperature reading region intuitively.
+    If set PID type to `temp` or `margin`, user should tune the PID parameters following the [tuning README](https://github.com/openbmc/phosphor-pid-control/blob/master/tuning.md).
+
+    The most important in **sensors** is the settings of `readPath` and `writePath`.
     Sensors must only set readPath, and fill up empty string to writePath.
-    Fans should set the D-Bus path to readPath, also set the pwm system path to writePath.
+    Fans could set the D-Bus path to readPath, also set the pwm system path to writePath.
+    More detail about readPath and writePath please refer README that mentioned above.
 
 
 * OpenBMC will run swampd through [phosphor-pid-control.service](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/fans/phosphor-pid-control/phosphor-pid-control.service) that controls the fans by pre-defined zones. Here is a example service.
