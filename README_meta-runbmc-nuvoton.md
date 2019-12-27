@@ -916,16 +916,7 @@ In order to automatically apply accurate and responsive correction to a fan cont
                             "7": 32,
                             "8": 33,
                             "9": 34,
-                            "10": 35,
-                            "11": 36,
-                            "12": 37,
-                            "13": 38,
-                            "14": 39,
-                            "15": 40,
-                            "16": 42,
-                            "17": 44,
-                            "18": 45,
-                            "19": 50
+                            ...
                         },
                         "output": {
                             "0": 10,
@@ -938,16 +929,7 @@ In order to automatically apply accurate and responsive correction to a fan cont
                             "7": 30,
                             "8": 40,
                             "9": 50,
-                            "10": 60,
-                            "11": 73,
-                            "12": 76,
-                            "13": 79,
-                            "14": 82,
-                            "15": 86,
-                            "16": 90,
-                            "17": 90,
-                            "18": 100,
-                            "19": 100
+                            ...
                         }
                     },
                 },
@@ -961,15 +943,32 @@ In order to automatically apply accurate and responsive correction to a fan cont
     **Sensors** defined the all component which are involved PID like temperature sensors, or fans.
     **Zones** defined the mechanism how the swampd control each fans by setting parameters.
 
-    There are four PID controller types user can use: `fan`, `temp`, `margin`, and `stepwise`.
-    User should drive fans by setting PID type to `fan` in zones, and determine which target is using to control RPM like PID type `stepwise`, `temp` or `margin`.
-    The PID type `stepwise` control fans by temperature reading region intuitively.
-    If set PID type to `temp` or `margin`, user should tune the PID parameters following the [tuning README](https://github.com/openbmc/phosphor-pid-control/blob/master/tuning.md).
-
-    The most important in **sensors** is the settings of `readPath` and `writePath`.
-    Sensors must only set readPath, and fill up empty string to writePath.
+    The most important in **sensors** section is the settings of `readPath` and `writePath`.
+    Sensors like temperature sensor or margin sensor must only set readPath, and fill up empty string to writePath.
     Fans could set the D-Bus path to readPath, also set the pwm system path to writePath.
     More detail about readPath and writePath please refer README that mentioned above.
+
+    There are four PID controller types user can use: `fan`, `temp`, `margin`, and `stepwise` in **zones**.
+    User can tune the PID parameters following the [tuning README](https://github.com/openbmc/phosphor-pid-control/blob/master/tuning.md). 
+
+    In above example case, the fan PID controller has a lot of PID parameters. And we only use the stepwise controller to control whole zone, so the PID parameters in fan controller like `integralCoeff` or `outLim_max` would not work.
+    And the parameter `inputs` for stepwise controller must be thermal sensor.
+    Please note the parameter `setpoint` is no meaning for type `fan` and `stepwise` currently, and cannot be left out.
+
+    If user want to control whole zone by stepwise controller like example configuration, the key point is set reading and output.
+    The `stepwise` PID use the mapping of reading and output value instead of set RPM setpoint.
+    The reading and output value should be a pair, and user can set 20 pairs in maximum, one more pairs at least.
+    And the `stepwise` will return output setpoint if temperature **is larger** than reading value.
+    For example, assume here are pairs of `stepwise` reading and output:
+    ```
+    {
+      "reading": {25, 26, 27},
+      "output": {10, 20, 30}
+    }
+    ```
+
+    If the temperature reading is 25.5°C, the return value will be 10.
+    And if the reading value is 26.5°C, the stepwise controller will set 20% RPM to fan(s).
 
 
 * OpenBMC will run swampd through [phosphor-pid-control.service](https://github.com/Nuvoton-Israel/openbmc/blob/runbmc/meta-quanta/meta-olympus-nuvoton/recipes-phosphor/fans/phosphor-pid-control/phosphor-pid-control.service) that controls the fans by pre-defined zones. Here is a example service.
